@@ -1,4 +1,7 @@
 import org.apache.lucene.document.Document;
+import org.apache.lucene.document.Field;
+import org.apache.lucene.document.StringField;
+import org.apache.lucene.document.TextField;
 import org.apache.lucene.index.IndexWriter;
 import org.xml.sax.SAXException;
 
@@ -24,13 +27,12 @@ public class DocumentIndexer
             // add document to lucene
             Document doc = new Document();
 
-            // TODO
-            // add title
-            // add tags
+            // TODO: tokenizers, token filters, analyzers etc
 
-            // add question
-
-            // add answers
+            doc.add(new TextField("title", handler.getTitle(), Field.Store.NO));
+            doc.add(new TextField("question", handler.getQuestion(), Field.Store.NO));
+            doc.add(new TextField("answers", handler.getAnswers(), Field.Store.NO));
+            doc.add(new TextField("tags", handler.getTags(), Field.Store.NO));
 
 
         } catch (SAXException | ParserConfigurationException | IOException e) {

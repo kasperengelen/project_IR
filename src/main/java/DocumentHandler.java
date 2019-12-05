@@ -8,18 +8,37 @@ import org.xml.sax.helpers.DefaultHandler;
  */
 public class DocumentHandler extends DefaultHandler
 {
-    String m_title;
-    String m_question;
-    String m_tags;
+    private String m_title;
+    private String m_question;
+    private String m_tags;
 
     // concatenation of all answers
-    String m_answers;
+    private String m_answers;
 
-    boolean m_inQuestion = false;
-    boolean m_inAnswer = false;
-    boolean m_inTitle = false;
-    boolean m_inBody = false;
-    boolean m_inTags = false;
+    private boolean m_inQuestion = false;
+    private boolean m_inAnswer = false;
+    private boolean m_inTitle = false;
+    private boolean m_inBody = false;
+    private boolean m_inTags = false;
+
+    public String getTitle()
+    {
+        return m_title;
+    }
+
+    public String getQuestion()
+    {
+        return m_question;
+    }
+
+    public String getAnswers()
+    {
+        return m_answers;
+    }
+
+    public String getTags() {
+        return m_tags;
+    }
 
     /**
      * Notify that an opening tag has been encountered.
