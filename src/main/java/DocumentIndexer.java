@@ -29,10 +29,17 @@ public class DocumentIndexer
 
             // TODO: tokenizers, token filters, analyzers etc
 
+            // NOTE: if STORE is set to true, this means that it will be returned as a search result
+            //       if STORE is set to false, it still can be used in queries, but it won't be returned
+            //                  as the result of the search
+
             doc.add(new TextField("title", handler.getTitle(), Field.Store.NO));
             doc.add(new TextField("question", handler.getQuestion(), Field.Store.NO));
             doc.add(new TextField("answers", handler.getAnswers(), Field.Store.NO));
             doc.add(new TextField("tags", handler.getTags(), Field.Store.NO));
+
+            // we use the filename to identify the document.
+            doc.add(new StringField("filename", file.getFileName().toString(), Field.Store.YES));
 
 
         } catch (SAXException | ParserConfigurationException | IOException e) {
