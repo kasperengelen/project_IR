@@ -2,11 +2,13 @@ import org.xml.sax.Attributes;
 import org.xml.sax.SAXException;
 import org.xml.sax.helpers.DefaultHandler;
 
+import javax.xml.parsers.SAXParser;
+
 /**
  * Class that provides a handler for the SAX XML parsing library.
  * This handler will parse documents as specified in the project requirements.
  */
-public class DocumentHandler extends DefaultHandler
+public class DocumentXMLHandler extends DefaultHandler
 {
     private String m_title;
     private String m_question;
@@ -52,6 +54,8 @@ public class DocumentHandler extends DefaultHandler
     {
         String lowercase_tagname = qName.toLowerCase();
 
+        System.out.println("START " + lowercase_tagname);
+
         switch(lowercase_tagname)
         {
             case "question":
@@ -70,7 +74,7 @@ public class DocumentHandler extends DefaultHandler
                 m_inTags = true;
                 break;
             default:
-                throw new SAXException(String.format("Invalid tag '%s'", qName));
+                throw new Exception(String.format("Invalid tag '%s'", qName));
         }
     }
 
@@ -85,6 +89,8 @@ public class DocumentHandler extends DefaultHandler
     public void endElement(String uri, String localName, String qName) throws SAXException
     {
         String lowercase_tagname = qName.toLowerCase();
+
+        System.out.println("END " + lowercase_tagname);
 
         switch(lowercase_tagname)
         {
@@ -104,7 +110,7 @@ public class DocumentHandler extends DefaultHandler
                 m_inTags = false;
                 break;
             default:
-                throw new SAXException(String.format("Invalid tag '%s'", qName));
+                throw new Exception(String.format("Invalid tag '%s'", qName));
         }
     }
 
@@ -127,10 +133,21 @@ public class DocumentHandler extends DefaultHandler
         } else if (m_inAnswer && m_inBody) {
             m_answers += " " + new String(ch);
         } else {
-            throw new SAXException(String.format(
-                    "Invalid state: inQuestion='%b', inAnswer='%b', inBody='%b', inTags='%b', inTitle='%b'",
-                    m_inQuestion, m_inAnswer, m_inBody, m_inTags, m_inTitle
-            ));
+//            throw new Exception(String.format(
+//                    "Invalid state: inQuestion='%b', inAnswer='%b', inBody='%b', inTags='%b', inTitle='%b'",
+//                    m_inQuestion, m_inAnswer, m_inBody, m_inTags, m_inTitle
+//            ));
+        }
+    }
+
+    /**
+     * Exception that can be thrown when things go wrong here.
+     */
+    public static class Exception extends SAXException
+    {
+        public Exception(String message)
+        {
+            super(message);
         }
     }
 }
