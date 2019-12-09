@@ -1,0 +1,39 @@
+paper IR:
+
+structuur DB van lucene:
+    lucene heeft een index
+    de index bestaat uit segmenten
+    een segment bestaat uit een doc (elk met een doc id dat uniek in aan segment, maar niet over de segmenten heen)
+    een doc bestaat uit fields
+
+    Lucene heeft ook een in-memory buffer. Deze kan geflushed worden naar een on-disk segment.
+
+    Lucene gebruikt een inverted index. Maar hier zijn ook uitbreidingen aan. Zo kan met datastructuren opstellen
+    om de index te "uninverten", dit is evt nuttig voor performance van sorteren.
+
+Constructie van een index:
+    men maakt Document objecten aan en voegt er fields aan toe. Daarna gebruikt men een IndexWriter om documenten aan de index toe te voegen
+    d.m.v. addDocument of updateDocument
+
+    Waaruit een document bestaat, of waarde data van een document vandaankomt is vrij te kiezen voor de gebruiker. De gebruiker kan ervoor kiezen
+    om bijv een file te openen, en onderdelen ervan toe te voegen aan een document.
+
+Fields:
+    Fields kunnen "gestored" worden. Dit betekent dat ze letterlijk worden opgeslagen in het geheugen, zodat ze later kant en klaar gepresenteerd kunnen worden
+    aan de gebruiker tijdens een query.
+    Fields "geindexeerd" worden. Dit betekent dat ze in queries gebruikt kunnen worden als zoekterm.
+    
+    Er is ook een tokenization en analyzing capabilities voor fields. Dit houdt in dat fields opgesplitst worden in tokens, tokens gefilterd worden, spelling correctie, etc.
+    Er is ook een termVector. Dit is alle informatie over die term zoals frequencies. Je kan het zien als een per-document inverted index.
+    Fields hebben ook bepaalde normalisation functionaliteiten waardoor de relevantie van termen kan worden opgeslagen in een term.
+    Ook multidimensional data is mogelijk.
+
+    TextField vs StringField: Text is tokenized en niet gestored, String is niet tokenized en is stored.
+
+Bruikbaarheid voor de stackoverflow dataset:
+    Zeer bruikbaar. Elke XML kan toegevoegd worden als een document. We moeten nog kijken hoe performant Lucene is met 3 miljoen documenten.
+
+Sources:
+    https://www.alibabacloud.com/blog/analysis-of-lucene---basic-concepts_594672
+    http://makble.com/lucene-field-stringfield-vs-textfield
+
