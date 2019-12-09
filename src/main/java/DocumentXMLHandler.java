@@ -10,13 +10,14 @@ import javax.xml.parsers.SAXParser;
  */
 public class DocumentXMLHandler extends DefaultHandler
 {
-    private String m_title;
-    private String m_question;
-    private String m_tags;
+    private String m_title = "";
+    private String m_question = "";
+    private String m_tags = "";
 
     // concatenation of all answers
-    private String m_answers;
+    private String m_answers = "";
 
+    private boolean m_inDocument = false;
     private boolean m_inQuestion = false;
     private boolean m_inAnswer = false;
     private boolean m_inTitle = false;
@@ -54,10 +55,11 @@ public class DocumentXMLHandler extends DefaultHandler
     {
         String lowercase_tagname = qName.toLowerCase();
 
-        System.out.println("START " + lowercase_tagname);
-
         switch(lowercase_tagname)
         {
+            case "document":
+                m_inDocument = true;
+                break;
             case "question":
                 m_inQuestion = true;
                 break;
@@ -90,10 +92,11 @@ public class DocumentXMLHandler extends DefaultHandler
     {
         String lowercase_tagname = qName.toLowerCase();
 
-        System.out.println("END " + lowercase_tagname);
-
         switch(lowercase_tagname)
         {
+            case "document":
+                m_inDocument = false;
+                break;
             case "question":
                 m_inQuestion = false;
                 break;
@@ -124,13 +127,13 @@ public class DocumentXMLHandler extends DefaultHandler
      */
     public void characters(char[] ch, int start, int length) throws SAXException
     {
-        if(m_inQuestion && m_inTitle) {
-            m_title = new String(ch);
-        } else if(m_inQuestion && m_inBody) {
-            m_question = new String(ch);
-        } else if(m_inQuestion && m_inTags) {
-            m_tags = new String(ch);
-        } else if (m_inAnswer && m_inBody) {
+        if(m_inDocument && m_inQuestion && m_inTitle) {
+            m_title += " " + new String(ch);
+        } else if(m_inDocument && m_inQuestion && m_inBody) {
+            m_question += " " + new String(ch);
+        } else if(m_inDocument && m_inQuestion && m_inTags) {
+            m_tags += " " + new String(ch);
+        } else if (m_inDocument && m_inAnswer && m_inBody) {
             m_answers += " " + new String(ch);
         } else {
 //            throw new Exception(String.format(

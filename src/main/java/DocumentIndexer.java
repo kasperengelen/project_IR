@@ -14,7 +14,10 @@ import org.xml.sax.SAXException;
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.parsers.SAXParser;
 import javax.xml.parsers.SAXParserFactory;
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
+import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.FileVisitResult;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -25,6 +28,7 @@ import java.util.Date;
 /**
  * Part of the class was inspired by the following source:
  *    https://lucene.apache.org/core/5_4_0/demo/src-html/org/apache/lucene/demo/IndexFiles.html
+ *    https://howtodoinjava.com/java/io/java-read-file-to-string-examples/
  */
 public class DocumentIndexer
 {
@@ -43,6 +47,8 @@ public class DocumentIndexer
         Directory dir = FSDirectory.open(index_path);
         Analyzer analyzer = new StandardAnalyzer();
         IndexWriterConfig iwc = new IndexWriterConfig(analyzer);
+
+        //iwc.setRAMBufferSizeMB(5120.0);
 
         if (create_new) {
             // Create a new index in the directory, removing any
@@ -71,6 +77,14 @@ public class DocumentIndexer
                         doc_counter[1] += 1;
                     }
 
+                    if(doc_counter[0] % 50 == 0)
+                    {
+                        System.out.println(String.format(
+                                "Processed %d documents of which %d successful.",
+                                doc_counter[0], doc_counter[1]
+                        ));
+                    }
+
                     return FileVisitResult.CONTINUE;
                 }
             });
@@ -93,8 +107,8 @@ public class DocumentIndexer
 
     /**
      * Index the
-     * @param file
-     * @param writer
+     * @param file The file that contains information about the document.
+     * @param writer The {@link IndexWriter} that writes to a Lucene index.
      *
      * @return True if the document was successfully indexed, False otherwised.
      */
@@ -106,7 +120,18 @@ public class DocumentIndexer
             SAXParser saxParser = factory.newSAXParser();
             DocumentXMLHandler handler = new DocumentXMLHandler();
 
-            saxParser.parse(file.toFile(), handler);
+            // TODO enclose file in <document> tags so that is has a single root.
+
+            String file_data = "<document>";
+
+            file_data += new String(Files.readAllBytes(file));
+
+            file_data += "</document>";
+
+            InputStream file_stream = new ByteArrayInputStream(file_data.getBytes(StandardCharsets.UTF_8));
+
+            saxParser.parse(file_stream, handler);
+
 
             // add document to lucene
             Document doc = new Document();
@@ -123,18 +148,16 @@ public class DocumentIndexer
             // we use the filename to identify the document.
             doc.add(new StringField("filename", file.getFileName().toString(), Field.Store.YES));
 
-
-
             // add to index
             if (writer.getConfig().getOpenMode() == IndexWriterConfig.OpenMode.CREATE) {
                 // New index, so we just add the document (no old document can be there):
-                System.out.println(String.format("Added document '%s'", file.getFileName().toString()));
+                //System.out.println(String.format("Added document '%s'", file.getFileName().toString()));
                 writer.addDocument(doc);
             } else {
                 // Existing index (an old copy of this document may have been indexed) so
                 // we use updateDocument instead to replace the old one matching the exact
                 // path, if present:
-                System.out.println(String.format("Updated document '%s'", file.getFileName().toString()));
+                //System.out.println(String.format("Updated document '%s'", file.getFileName().toString()));
                 writer.updateDocument(new Term("filename", file.getFileName().toString()), doc);
             }
 

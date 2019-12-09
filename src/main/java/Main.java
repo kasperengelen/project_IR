@@ -9,10 +9,13 @@ public class Main
 {
     public static void main(String[] argv)
     {
+        // TODO performance-conscious programming
+        // TODO allocate more ram (4GB?)
+
         try {
             System.out.println("test");
 
-            Path sample_dir = Paths.get("../small_sample/");
+            Path sample_dir = Paths.get("../posts_sample/");
             Path index_dir = Paths.get("../index/");
 
             DocumentIndexer.createIndex(sample_dir, index_dir, true);
