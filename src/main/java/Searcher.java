@@ -1,5 +1,5 @@
 import org.apache.lucene.analysis.Analyzer;
-import org.apache.lucene.analysis.standard.StandardAnalyzer;
+import org.apache.lucene.analysis.en.EnglishAnalyzer;
 import org.apache.lucene.document.Document;
 import org.apache.lucene.index.DirectoryReader;
 import org.apache.lucene.index.IndexReader;
@@ -11,9 +11,10 @@ import org.apache.lucene.store.FSDirectory;
 
 import java.io.IOException;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Part of the class was inspired by the following source:
@@ -31,6 +32,11 @@ public class Searcher
          * A list of filenames of the top results.
          */
         public List<String> topResultFilenames = new ArrayList<>();
+
+        /**
+         * A map that maps filenames of the top results list, to their score.
+         */
+        public Map<String, Float> scores = new HashMap<>();
 
         /**
          * The requested amount of results.
@@ -65,7 +71,7 @@ public class Searcher
                 DocumentIndexer.FieldNames.FILENAME // useful to find a certain document
         };
 
-        Analyzer analyzer = new StandardAnalyzer();
+        Analyzer analyzer = new EnglishAnalyzer();
         QueryParser parser = new MultiFieldQueryParser(fields, analyzer);
         Query query = parser.parse(querystring);
 
@@ -81,8 +87,9 @@ public class Searcher
         for (ScoreDoc hit : hits) {
             Document doc = searcher.doc(hit.doc);
 
-            String filename = doc.get("filename");
+            String filename = doc.get(DocumentIndexer.FieldNames.FILENAME);
             retval.topResultFilenames.add(filename);
+            retval.scores.put(filename, hit.score);
         }
 
         return retval;

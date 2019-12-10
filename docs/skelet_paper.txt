@@ -38,9 +38,15 @@ Querying:
     Een query kan opgesteld worden door ze neer te schrijven in een String en ze te parser met QueryParser. Na het searchen kan men de top-k resultaten retrieven, alsook de bijhorende scores.
 
 Analyzing:
-    ...
+    Een analyzer bestaat uit een Tokenizer en een Filter. Meerdere bestaande tokenizers en filters kunnen aangeen geschakeld worden. Het is mogelijk om voor elke Field van een document een andere analyzer te voorzien.
+    Analyzers voeren taken uit zoals een string opsplitsen in tokens, irrelevante tokens (zoals stopwoorden) filteren, alles naar lowercase zetten, etc.
+    Custom tokenizers zijn mogelijk. Een tokenizer wordt aan de indexer en querier gegeven.
+    Er worden ook taal-specifieke analyzers voorzien. English analyzer voorziet het inkorten van woorden naar de stam, conversie naar lowercase, etc.
+    Sommige analyzers herkennen bepaalde partronen zoals emailadressen en URL's.    
 
 Sources:
     https://www.alibabacloud.com/blog/analysis-of-lucene---basic-concepts_594672
     http://makble.com/lucene-field-stringfield-vs-textfield
+    https://www.baeldung.com/lucene-analyzers
+
 

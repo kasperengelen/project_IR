@@ -1,5 +1,5 @@
 import org.apache.lucene.analysis.Analyzer;
-import org.apache.lucene.analysis.standard.StandardAnalyzer;
+import org.apache.lucene.analysis.en.EnglishAnalyzer;
 import org.apache.lucene.document.Document;
 import org.apache.lucene.document.Field;
 import org.apache.lucene.document.StringField;
@@ -76,7 +76,7 @@ public class DocumentIndexer
     {
         // TODO analyzer kiezen! dit heeft invloed op tokenization
         Directory dir = FSDirectory.open(index_path);
-        Analyzer analyzer = new StandardAnalyzer();
+        Analyzer analyzer = new EnglishAnalyzer();
         IndexWriterConfig iwc = new IndexWriterConfig(analyzer);
 
         //iwc.setRAMBufferSizeMB(5120.0);
