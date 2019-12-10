@@ -1,6 +1,8 @@
-import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.Date;
+
+// TODO exceptions
 
 /**
  * Main class.
@@ -18,12 +20,34 @@ public class Main
             Path sample_dir = Paths.get("../posts_sample/");
             Path index_dir = Paths.get("../index/");
 
-            DocumentIndexer.createIndex(sample_dir, index_dir, true);
+            if(true) {
+
+                DocumentIndexer.IndexationStats stats = DocumentIndexer.createIndex(sample_dir, index_dir, true, true);
+
+                System.out.println(String.format(
+                        "Indexing complete. Indexed %d/%d documents. Took %d miliseconds.",
+                        stats.completed, stats.total, stats.runtime
+                ));
+            }
 
 
-            // TODO args
-            // TODO call DocumentIndexer
-            // TODO querier
+            String query = "Q136548";
+            Date search_start = new Date();
+            Searcher.SearchResult result = Searcher.search(query, 50, index_dir);
+            Date search_end = new Date();
+
+            System.out.println(String.format(
+                    "Found results. Took %d miliseconds. %d results total, %d retrieved.",
+                    search_end.getTime() - search_start.getTime(), result.totalResultCount, result.topResultFilenames.size()
+            ));
+
+            System.out.println("RESULT:");
+
+            for (String filename : result.topResultFilenames)
+            {
+                System.out.println(filename);
+            }
+
         } catch(Exception e) {
             System.err.println(e.getMessage());
             e.printStackTrace();

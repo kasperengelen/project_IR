@@ -32,16 +32,47 @@ import java.util.Date;
  */
 public class DocumentIndexer
 {
+    public static class FieldNames
+    {
+        public static final String ANSWER = "answer";
+        public static final String QUESTION = "question";
+        public static final String TITLE = "title";
+        public static final String TAGS = "tags";
+        public static final String FILENAME = "filename";
+    }
+
+    /**
+     * Class that contains information about an indexation.
+     */
+    public static class IndexationStats
+    {
+        /**
+         * The duration of the indexation in miliseconds.
+         */
+        int runtime;
+
+        /**
+         * The amount of files that were successfully indexed.
+         */
+        int completed;
+
+        /**
+         * The total amount of files that the indexer tried to index.
+         */
+        int total;
+    }
+
     /**
      * Index the specified directory of documents, and store it to the specified path.
      *
      * @param documents_path The directory that contains the documents that are to be indexed.
      * @param index_path The directory that contains the created index.
      * @param create_new True if the index is created from scratch, False if the index already exists and needs to be updated.
+     * @param print_progress True if progress messages and error messages should be printed, false otherwise.
      *
      * @throws IOException If the index and document directories could not be properly accessed.
      */
-    public static void createIndex(Path documents_path, Path index_path, boolean create_new) throws IOException
+    public static IndexationStats createIndex(Path documents_path, Path index_path, boolean create_new, boolean print_progress) throws IOException
     {
         // TODO analyzer kiezen! dit heeft invloed op tokenization
         Directory dir = FSDirectory.open(index_path);
@@ -63,25 +94,25 @@ public class DocumentIndexer
 
         IndexWriter writer = new IndexWriter(dir, iwc);
 
-        // trick to allow for final declared variable.
-        final int[] doc_counter = {0, 0};
+        // keep track of stats
+        final IndexationStats stats = new IndexationStats();
 
         if (Files.isDirectory(documents_path)) {
             Files.walkFileTree(documents_path, new SimpleFileVisitor<Path>() {
                 @Override
                 public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException {
-                    doc_counter[0] += 1;
+                    stats.total += 1;
 
                     // if the indexing was successfull
-                    if(M_indexDocument(file, writer)) {
-                        doc_counter[1] += 1;
+                    if(M_indexDocument(file, writer, print_progress)) {
+                        stats.completed += 1;
                     }
 
-                    if(doc_counter[0] % 50 == 0)
+                    if(print_progress && stats.completed % 100 == 0)
                     {
                         System.out.println(String.format(
-                                "Processed %d documents of which %d successful.",
-                                doc_counter[0], doc_counter[1]
+                                "Processed %d documents, of which %d successful.",
+                                stats.total, stats.completed
                         ));
                     }
 
@@ -99,28 +130,26 @@ public class DocumentIndexer
 
         Date end = new Date();
 
-        System.out.println(String.format(
-            "Indexing complete. Indexed %d/%d documents. Took %d miliseconds.",
-            doc_counter[1], doc_counter[0], end.getTime() - start.getTime()
-        ));
+        stats.runtime = Math.toIntExact(end.getTime() - start.getTime());
+
+        return stats;
     }
 
     /**
      * Index the
      * @param file The file that contains information about the document.
      * @param writer The {@link IndexWriter} that writes to a Lucene index.
+     * @param print_errors True if errors messages should be printed, false otherwise.
      *
      * @return True if the document was successfully indexed, False otherwised.
      */
-    private static boolean M_indexDocument(Path file, IndexWriter writer)
+    private static boolean M_indexDocument(Path file, IndexWriter writer, boolean print_errors)
     {
         try {
             // parse document
             SAXParserFactory factory = SAXParserFactory.newInstance();
             SAXParser saxParser = factory.newSAXParser();
             DocumentXMLHandler handler = new DocumentXMLHandler();
-
-            // TODO enclose file in <document> tags so that is has a single root.
 
             String file_data = "<document>";
 
@@ -132,7 +161,6 @@ public class DocumentIndexer
 
             saxParser.parse(file_stream, handler);
 
-
             // add document to lucene
             Document doc = new Document();
 
@@ -140,13 +168,13 @@ public class DocumentIndexer
             //       if STORE is set to false, it still can be used in queries, but it won't be returned
             //                  as the result of the search
 
-            doc.add(new TextField("title", handler.getTitle(), Field.Store.NO));
-            doc.add(new TextField("question", handler.getQuestion(), Field.Store.NO));
-            doc.add(new TextField("answers", handler.getAnswers(), Field.Store.NO));
-            doc.add(new TextField("tags", handler.getTags(), Field.Store.NO));
+            doc.add(new TextField(FieldNames.TITLE,    handler.getTitle(),    Field.Store.NO));
+            doc.add(new TextField(FieldNames.QUESTION, handler.getQuestion(), Field.Store.NO));
+            doc.add(new TextField(FieldNames.ANSWER,   handler.getAnswers(),  Field.Store.NO));
+            doc.add(new TextField(FieldNames.TAGS,     handler.getTags(),     Field.Store.NO));
 
             // we use the filename to identify the document.
-            doc.add(new StringField("filename", file.getFileName().toString(), Field.Store.YES));
+            doc.add(new StringField(FieldNames.FILENAME, file.getFileName().toString(), Field.Store.YES));
 
             // add to index
             if (writer.getConfig().getOpenMode() == IndexWriterConfig.OpenMode.CREATE) {
@@ -158,18 +186,20 @@ public class DocumentIndexer
                 // we use updateDocument instead to replace the old one matching the exact
                 // path, if present:
                 //System.out.println(String.format("Updated document '%s'", file.getFileName().toString()));
-                writer.updateDocument(new Term("filename", file.getFileName().toString()), doc);
+                writer.updateDocument(new Term(FieldNames.FILENAME, file.getFileName().toString()), doc);
             }
 
             return true;
 
         } catch (SAXException | ParserConfigurationException | IOException e) {
-            System.out.println(String.format(
-               "Error while processing document '%s': %s",
-               file.getFileName().toString(), e.getMessage()
-            ));
+            if(print_errors) {
+                System.out.println(String.format(
+                        "Error while processing document '%s': %s",
+                        file.getFileName().toString(), e.getMessage()
+                ));
 
-            e.printStackTrace();
+                e.printStackTrace();
+            }
 
             return false;
         }
