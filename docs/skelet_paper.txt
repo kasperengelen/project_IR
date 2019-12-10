@@ -33,6 +33,13 @@ Fields:
 Bruikbaarheid voor de stackoverflow dataset:
     Zeer bruikbaar. Elke XML kan toegevoegd worden als een document. We moeten nog kijken hoe performant Lucene is met 3 miljoen documenten.
 
+Querying:
+    Lucene heeft faciliteiten voor quering, met inbegrip van een querying taal. Het queryen houdt in dat met een IndexSearcher object aanmaakt, en deze een query aanrijkt.
+    Een query kan opgesteld worden door ze neer te schrijven in een String en ze te parser met QueryParser. Na het searchen kan men de top-k resultaten retrieven, alsook de bijhorende scores.
+
+Analyzing:
+    ...
+
 Sources:
     https://www.alibabacloud.com/blog/analysis-of-lucene---basic-concepts_594672
     http://makble.com/lucene-field-stringfield-vs-textfield
