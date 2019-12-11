@@ -20,7 +20,7 @@ public class Main
             Path sample_dir = Paths.get("../posts_sample/");
             Path index_dir = Paths.get("../index/");
 
-            if(true) {
+            if(false) {
 
                 DocumentIndexer.IndexationStats stats = DocumentIndexer.createIndex(sample_dir, index_dir, true, true);
 
@@ -31,7 +31,7 @@ public class Main
             }
 
 
-            String query = "Q136548";
+            String query = "sorting";
             Date search_start = new Date();
             Searcher.SearchResult result = Searcher.search(query, 50, index_dir);
             Date search_end = new Date();

@@ -67,8 +67,7 @@ public class Searcher
                 DocumentIndexer.FieldNames.TITLE,
                 DocumentIndexer.FieldNames.QUESTION,
                 DocumentIndexer.FieldNames.TAGS,
-                DocumentIndexer.FieldNames.ANSWER,
-                DocumentIndexer.FieldNames.FILENAME // useful to find a certain document
+                DocumentIndexer.FieldNames.ANSWER
         };
 
         Analyzer analyzer = new EnglishAnalyzer();
