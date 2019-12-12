@@ -2,7 +2,8 @@ import org.xml.sax.Attributes;
 import org.xml.sax.SAXException;
 import org.xml.sax.helpers.DefaultHandler;
 
-import javax.xml.parsers.SAXParser;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Class that provides a handler for the SAX XML parsing library.
@@ -13,9 +14,7 @@ public class DocumentXMLHandler extends DefaultHandler
     private String m_title = "";
     private String m_question = "";
     private String m_tags = "";
-
-    // concatenation of all answers
-    private String m_answers = "";
+    private List<String> m_answers = new ArrayList<>();
 
     private boolean m_inDocument = false;
     private boolean m_inQuestion = false;
@@ -24,21 +23,33 @@ public class DocumentXMLHandler extends DefaultHandler
     private boolean m_inBody = false;
     private boolean m_inTags = false;
 
+    /**
+     * Retrieve the title of the parsed document.
+     */
     public String getTitle()
     {
         return m_title;
     }
 
+    /**
+     * Retrieve the question of the parsed document.
+     */
     public String getQuestion()
     {
         return m_question;
     }
 
-    public String getAnswers()
+    /**
+     * Retrieve a list of answers of the parsed document.
+     */
+    public List<String> getAnswers()
     {
         return m_answers;
     }
 
+    /**
+     * Retrieve the tags of the parsed document.
+     */
     public String getTags() {
         return m_tags;
     }
@@ -46,8 +57,8 @@ public class DocumentXMLHandler extends DefaultHandler
     /**
      * Notify that an opening tag has been encountered.
      *
-     * @param uri
-     * @param localName
+     * @param uri ?
+     * @param localName ?
      * @param qName The name of the tag.
      * @throws SAXException
      */
@@ -76,15 +87,15 @@ public class DocumentXMLHandler extends DefaultHandler
                 m_inTags = true;
                 break;
             default:
-                throw new Exception(String.format("Invalid tag '%s'", qName));
+                throw new DocumentXMLHandlerException(String.format("Invalid tag '%s'", qName));
         }
     }
 
     /**
      * Notify that a closing tag has been encountered.
      *
-     * @param uri
-     * @param localName
+     * @param uri ?
+     * @param localName ?
      * @param qName The name of the tag.
      * @throws SAXException
      */
@@ -113,7 +124,7 @@ public class DocumentXMLHandler extends DefaultHandler
                 m_inTags = false;
                 break;
             default:
-                throw new Exception(String.format("Invalid tag '%s'", qName));
+                throw new DocumentXMLHandlerException(String.format("Invalid tag '%s'", qName));
         }
     }
 
@@ -121,34 +132,29 @@ public class DocumentXMLHandler extends DefaultHandler
      * Read characters contained in an element.
      *
      * @param ch A character array that represents the encountered characters.
-     * @param start
-     * @param length
+     * @param start The index where the text begins.
+     * @param length The amount of characters that are relevant here.
      * @throws SAXException
      */
     public void characters(char[] ch, int start, int length) throws SAXException
     {
         if(m_inDocument && m_inQuestion && m_inTitle) {
-            m_title += " " + new String(ch);
+            m_title += " " + new String(ch, start, length);
         } else if(m_inDocument && m_inQuestion && m_inBody) {
-            m_question += " " + new String(ch);
+            m_question += " " + new String(ch, start, length);
         } else if(m_inDocument && m_inQuestion && m_inTags) {
-            m_tags += " " + new String(ch);
+            m_tags += " " + new String(ch, start, length);
         } else if (m_inDocument && m_inAnswer && m_inBody) {
-            m_answers += " " + new String(ch);
-        } else {
-//            throw new Exception(String.format(
-//                    "Invalid state: inQuestion='%b', inAnswer='%b', inBody='%b', inTags='%b', inTitle='%b'",
-//                    m_inQuestion, m_inAnswer, m_inBody, m_inTags, m_inTitle
-//            ));
-        }
+            m_answers.add(new String(ch, start, length));
+        } // other cases are not useful
     }
 
     /**
      * Exception that can be thrown when things go wrong here.
      */
-    public static class Exception extends SAXException
+    public static class DocumentXMLHandlerException extends SAXException
     {
-        public Exception(String message)
+        public DocumentXMLHandlerException(String message)
         {
             super(message);
         }

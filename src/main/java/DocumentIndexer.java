@@ -32,6 +32,9 @@ import java.util.Date;
  */
 public class DocumentIndexer
 {
+    /**
+     * Class that contains constants for different field names.
+     */
     public static class FieldNames
     {
         public static final String ANSWER = "answer";
@@ -74,7 +77,6 @@ public class DocumentIndexer
      */
     public static IndexationStats createIndex(Path documents_path, Path index_path, boolean create_new, boolean print_progress) throws IOException
     {
-        // TODO analyzer kiezen! dit heeft invloed op tokenization
         Directory dir = FSDirectory.open(index_path);
         Analyzer analyzer = new EnglishAnalyzer();
         IndexWriterConfig iwc = new IndexWriterConfig(analyzer);
@@ -108,12 +110,8 @@ public class DocumentIndexer
                         stats.completed += 1;
                     }
 
-                    if(print_progress && stats.completed % 100 == 0)
-                    {
-                        System.out.println(String.format(
-                                "Processed %d documents, of which %d successful.",
-                                stats.total, stats.completed
-                        ));
+                    if(print_progress && stats.completed % 100 == 0) {
+                        Logger.logOut("Processed %d documents, of which %d successful.", stats.total, stats.completed);
                     }
 
                     return FileVisitResult.CONTINUE;
@@ -141,7 +139,7 @@ public class DocumentIndexer
      * @param writer The {@link IndexWriter} that writes to a Lucene index.
      * @param print_errors True if errors messages should be printed, false otherwise.
      *
-     * @return True if the document was successfully indexed, False otherwised.
+     * @return True if the document was successfully indexed, False otherwise.
      */
     private static boolean M_indexDocument(Path file, IndexWriter writer, boolean print_errors)
     {
@@ -168,24 +166,20 @@ public class DocumentIndexer
             //       if STORE is set to false, it still can be used in queries, but it won't be returned
             //                  as the result of the search
 
-            doc.add(new TextField(FieldNames.TITLE,    handler.getTitle(),    Field.Store.NO));
-            doc.add(new TextField(FieldNames.QUESTION, handler.getQuestion(), Field.Store.NO));
-            doc.add(new TextField(FieldNames.ANSWER,   handler.getAnswers(),  Field.Store.NO));
-            doc.add(new TextField(FieldNames.TAGS,     handler.getTags(),     Field.Store.NO));
+            doc.add(new TextField(FieldNames.TITLE,    handler.getTitle(),                              Field.Store.NO));
+            doc.add(new TextField(FieldNames.QUESTION, handler.getQuestion(),                           Field.Store.NO));
+            doc.add(new TextField(FieldNames.ANSWER,   String.join(" ", handler.getAnswers()),  Field.Store.NO));
+            doc.add(new TextField(FieldNames.TAGS,     handler.getTags(),                               Field.Store.NO));
 
             // we use the filename to identify the document.
             doc.add(new StringField(FieldNames.FILENAME, file.getFileName().toString(), Field.Store.YES));
 
             // add to index
             if (writer.getConfig().getOpenMode() == IndexWriterConfig.OpenMode.CREATE) {
-                // New index, so we just add the document (no old document can be there):
-                //System.out.println(String.format("Added document '%s'", file.getFileName().toString()));
+                // add new document
                 writer.addDocument(doc);
             } else {
-                // Existing index (an old copy of this document may have been indexed) so
-                // we use updateDocument instead to replace the old one matching the exact
-                // path, if present:
-                //System.out.println(String.format("Updated document '%s'", file.getFileName().toString()));
+                // update existing document
                 writer.updateDocument(new Term(FieldNames.FILENAME, file.getFileName().toString()), doc);
             }
 
@@ -193,10 +187,7 @@ public class DocumentIndexer
 
         } catch (SAXException | ParserConfigurationException | IOException e) {
             if(print_errors) {
-                System.out.println(String.format(
-                        "Error while processing document '%s': %s",
-                        file.getFileName().toString(), e.getMessage()
-                ));
+                Logger.logError("Error while processing document '%s': %s", file.getFileName().toString(), e.getMessage());
 
                 e.printStackTrace();
             }

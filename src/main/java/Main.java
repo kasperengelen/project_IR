@@ -1,6 +1,7 @@
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Date;
+import java.util.Scanner;
 
 // TODO exceptions
 
@@ -11,45 +12,51 @@ public class Main
 {
     public static void main(String[] argv)
     {
+
         // TODO performance-conscious programming
         // TODO allocate more ram (4GB?)
 
         try {
-            System.out.println("test");
+            Logger.logDebug("test");
 
             Path sample_dir = Paths.get("../posts_sample/");
             Path index_dir = Paths.get("../index/");
 
-            if(false) {
+            Logger.logOut("Construct index? (y)es or (n)o");
+            Scanner input_scanner = new Scanner(System.in);
+            String answer = input_scanner.nextLine();
 
-                DocumentIndexer.IndexationStats stats = DocumentIndexer.createIndex(sample_dir, index_dir, true, true);
+            if(answer.toLowerCase().equals("y") || answer.toLowerCase().equals("yes"))
+            {
+                DocumentIndexer.IndexationStats stats = DocumentIndexer.createIndex(sample_dir, index_dir, false, true);
 
-                System.out.println(String.format(
-                        "Indexing complete. Indexed %d/%d documents. Took %d miliseconds.",
-                        stats.completed, stats.total, stats.runtime
-                ));
+                Logger.logOut("Indexing complete. Indexed %d/%d documents. Took %d miliseconds.", stats.completed, stats.total, stats.runtime);
             }
 
+            Logger.logOut("Input query:");
+            String query = input_scanner.nextLine();
 
-            String query = "sorting";
+            Logger.logOut("Searching for '" + query + "'");
+
             Date search_start = new Date();
             Searcher.SearchResult result = Searcher.search(query, 50, index_dir);
             Date search_end = new Date();
 
-            System.out.println(String.format(
+            Logger.logOut(
                     "Found results. Took %d miliseconds. %d results total, %d retrieved.",
                     search_end.getTime() - search_start.getTime(), result.totalResultCount, result.topResultFilenames.size()
-            ));
+            );
 
-            System.out.println("RESULT:");
+            Logger.logOut("RESULT:");
 
             for (String filename : result.topResultFilenames)
             {
-                System.out.println(filename);
+                Logger.logDebug(filename);
+                DocumentPrinter.printDocument("../posts_sample/" + filename);
             }
 
         } catch(Exception e) {
-            System.err.println(e.getMessage());
+            Logger.logError(e.getMessage());
             e.printStackTrace();
         }
     }
