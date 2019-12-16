@@ -19,7 +19,7 @@ public class Main
         try {
             Logger.logDebug("test");
 
-            Path sample_dir = Paths.get("../posts_sample/");
+            Path sample_dir = Paths.get("../big_sample/");
             Path index_dir = Paths.get("../index/");
 
             Logger.logOut("Construct index? (y)es or (n)o");
@@ -35,8 +35,10 @@ public class Main
 
             Logger.logOut("Input query:");
             String query = input_scanner.nextLine();
+            Logger.logOut("");
 
-            Logger.logOut("Searching for '" + query + "'");
+            Logger.logOut("Searching for '" + query + "'...");
+            Logger.logOut("");
 
             Date search_start = new Date();
             Searcher.SearchResult result = Searcher.search(query, 50, index_dir);
@@ -47,12 +49,10 @@ public class Main
                     search_end.getTime() - search_start.getTime(), result.totalResultCount, result.topResultFilenames.size()
             );
 
-            Logger.logOut("RESULT:");
-
             for (String filename : result.topResultFilenames)
             {
-                Logger.logDebug(filename);
-                DocumentPrinter.printDocument("../posts_sample/" + filename);
+                Logger.logOut("");
+                DocumentPrinter.printDocument("../big_sample/" + filename);
             }
 
         } catch(Exception e) {

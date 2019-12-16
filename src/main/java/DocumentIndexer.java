@@ -81,7 +81,7 @@ public class DocumentIndexer
         Analyzer analyzer = new EnglishAnalyzer();
         IndexWriterConfig iwc = new IndexWriterConfig(analyzer);
 
-        //iwc.setRAMBufferSizeMB(5120.0);
+        iwc.setRAMBufferSizeMB(5120.0);
 
         if (create_new) {
             // Create a new index in the directory, removing any

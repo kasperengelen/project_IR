@@ -138,15 +138,31 @@ public class DocumentXMLHandler extends DefaultHandler
      */
     public void characters(char[] ch, int start, int length) throws SAXException
     {
+        String contents = replaceHTMLCodes(new String(ch, start, length));
+
         if(m_inDocument && m_inQuestion && m_inTitle) {
-            m_title += " " + new String(ch, start, length);
+            m_title = contents;
         } else if(m_inDocument && m_inQuestion && m_inBody) {
-            m_question += " " + new String(ch, start, length);
+            m_question = contents;
         } else if(m_inDocument && m_inQuestion && m_inTags) {
-            m_tags += " " + new String(ch, start, length);
+            m_tags = contents;
         } else if (m_inDocument && m_inAnswer && m_inBody) {
-            m_answers.add(new String(ch, start, length));
+            m_answers.add(contents);
         } // other cases are not useful
+    }
+
+    /**
+     * Replace HTML codes for special characters with the actual special characters.
+     */
+    private static String replaceHTMLCodes(String input)
+    {
+        input = input.replace("&gt;", ">");
+        input = input.replace("&lt;", "<");
+        input = input.replace("&amp;", "&");
+        input = input.replace("&frasl;", "/");
+        input = input.replace("<code>", "");
+
+        return input;
     }
 
     /**

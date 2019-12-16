@@ -39,6 +39,7 @@ public class DocumentPrinter
 
             saxParser.parse(file_stream, handler);
 
+            Logger.logOut("FILENAME: %s", filename);
             Logger.logOut("TITLE: %s", handler.getTitle());
             Logger.logOut("TAGS: %s", handler.getTags());
 
