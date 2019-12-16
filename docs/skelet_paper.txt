@@ -48,6 +48,12 @@ Scoring:
     Lucene gebruikt een combinatie van het Vector Space Model en het Boolean Model. (Er is een slide met daarin de formule die Lucene gebruikt). Elke dimensie komt overeen met een unieke
     index term. De gewichten zijn tf-idf waardes.
 
+    De scoring function is geimplementeerd d.m.v. similitaries. De similarity klasse wordt zowel at index time als at query time gebruikt.
+
+    Het is mogelijk om de Similarity klasse te overriden. Om een custom similarity klasse te gebruiken, doet men IndexWriterConfig.setSimilarity(Similarity) of IndexSearcher.setSimilarity(Similarity), om de similarity te gebruiken at index of at query time te gebruiken respectievelijk.
+
+    Lucene voorziet ook nog andere Similarity implementaties in het "org.apache.lucene.search.similarities" package.
+
 Overige:
     Er zijn "expert options", mogelijkheden om de interne werking van Lucene te beinvloeden. (bijv het instellen van weights, herimplementeren van Query klasses, etc)
 
@@ -57,4 +63,6 @@ Sources:
     https://www.baeldung.com/lucene-analyzers
     https://lucene.apache.org/core/3_5_0/scoring.html (bevat ook stap-voor-stap querying algo dat lucene gebruikt)
     https://lucene.apache.org/core/3_5_0/api/core/org/apache/lucene/search/Similarity.html
-
+    http://www.lucenetutorial.com/advanced-topics/scoring.html
+    https://lucene.apache.org/core/4_6_0/core/org/apache/lucene/search/similarities/Similarity.html
+    https://lucene.apache.org/core/6_5_1/core/org/apache/lucene/search/similarities/package-summary.html
