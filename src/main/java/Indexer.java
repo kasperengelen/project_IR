@@ -30,7 +30,7 @@ import java.util.Date;
  *    https://lucene.apache.org/core/5_4_0/demo/src-html/org/apache/lucene/demo/IndexFiles.html
  *    https://howtodoinjava.com/java/io/java-read-file-to-string-examples/
  */
-public class DocumentIndexer
+public class Indexer
 {
     /**
      * Class that contains constants for different field names.
@@ -110,7 +110,7 @@ public class DocumentIndexer
                         stats.completed += 1;
                     }
 
-                    if(print_progress && stats.completed % 100 == 0) {
+                    if(print_progress && stats.completed % 1000 == 0) {
                         Logger.logOut("Processed %d documents, of which %d successful.", stats.total, stats.completed);
                     }
 

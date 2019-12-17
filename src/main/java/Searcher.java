@@ -64,11 +64,11 @@ public class Searcher
 
         // list here all the fields that are searched
         String[] fields = {
-                DocumentIndexer.FieldNames.TITLE,
-                DocumentIndexer.FieldNames.QUESTION,
-                DocumentIndexer.FieldNames.TAGS,
-                DocumentIndexer.FieldNames.ANSWER,
-                DocumentIndexer.FieldNames.FILENAME
+                Indexer.FieldNames.TITLE,
+                Indexer.FieldNames.QUESTION,
+                Indexer.FieldNames.TAGS,
+                Indexer.FieldNames.ANSWER,
+                Indexer.FieldNames.FILENAME
         };
 
         Analyzer analyzer = new EnglishAnalyzer();
@@ -87,7 +87,7 @@ public class Searcher
         for (ScoreDoc hit : hits) {
             Document doc = searcher.doc(hit.doc);
 
-            String filename = doc.get(DocumentIndexer.FieldNames.FILENAME);
+            String filename = doc.get(Indexer.FieldNames.FILENAME);
             retval.topResultFilenames.add(filename);
             retval.scores.put(filename, hit.score);
         }
