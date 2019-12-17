@@ -23,6 +23,8 @@ public class DocumentXMLHandler extends DefaultHandler
     private boolean m_inBody = false;
     private boolean m_inTags = false;
 
+    private StringBuilder chars = new StringBuilder();
+
     /**
      * Retrieve the title of the parsed document.
      */
@@ -78,12 +80,15 @@ public class DocumentXMLHandler extends DefaultHandler
                 m_inAnswer = true;
                 break;
             case "title":
+                chars.setLength(0);
                 m_inTitle = true;
                 break;
             case "body":
+                chars.setLength(0);
                 m_inBody = true;
                 break;
             case "tags":
+                chars.setLength(0);
                 m_inTags = true;
                 break;
             default:
@@ -101,6 +106,16 @@ public class DocumentXMLHandler extends DefaultHandler
      */
     public void endElement(String uri, String localName, String qName) throws SAXException
     {
+        if(m_inDocument && m_inQuestion && m_inTitle) {
+            m_title = chars.toString();
+        } else if(m_inDocument && m_inQuestion && m_inBody) {
+            m_question = chars.toString();
+        } else if(m_inDocument && m_inQuestion && m_inTags) {
+            m_tags = chars.toString();
+        } else if (m_inDocument && m_inAnswer && m_inBody) {
+            m_answers.add(chars.toString());
+        } // other cases are not useful
+
         String lowercase_tagname = qName.toLowerCase();
 
         switch(lowercase_tagname)
@@ -138,17 +153,9 @@ public class DocumentXMLHandler extends DefaultHandler
      */
     public void characters(char[] ch, int start, int length) throws SAXException
     {
-        String contents = replaceHTMLCodes(new String(ch, start, length));
-
-        if(m_inDocument && m_inQuestion && m_inTitle) {
-            m_title = contents;
-        } else if(m_inDocument && m_inQuestion && m_inBody) {
-            m_question = contents;
-        } else if(m_inDocument && m_inQuestion && m_inTags) {
-            m_tags = contents;
-        } else if (m_inDocument && m_inAnswer && m_inBody) {
-            m_answers.add(contents);
-        } // other cases are not useful
+        // Need to use string builder here, see:
+        // https://stackoverflow.com/questions/13336140/sax-parsing-and-special-characters
+        chars.append(ch, start, length);
     }
 
     /**
@@ -156,6 +163,7 @@ public class DocumentXMLHandler extends DefaultHandler
      */
     private static String replaceHTMLCodes(String input)
     {
+        // Left this function for now, but I think we can remove it later
         input = input.replace("&gt;", ">");
         input = input.replace("&lt;", "<");
         input = input.replace("&amp;", "&");
