@@ -63,6 +63,9 @@ public class Main
                         return FileVisitResult.CONTINUE;
                     }
                 });
+
+                title_out.close();
+                tags_out.close();
             }
         } catch (IOException e) {
             e.printStackTrace();
