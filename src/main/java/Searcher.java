@@ -61,6 +61,7 @@ public class Searcher
     {
         IndexReader reader = DirectoryReader.open(FSDirectory.open(index_path));
         IndexSearcher searcher = new IndexSearcher(reader);
+        searcher.setSimilarity(Constants.DEFAULT_SIM_SEARCHER);
 
         // list here all the fields that are searched
         String[] fields = {

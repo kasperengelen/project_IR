@@ -1,7 +1,3 @@
-import org.apache.lucene.index.DirectoryReader;
-import org.apache.lucene.index.IndexReader;
-import org.apache.lucene.store.Directory;
-import org.apache.lucene.store.FSDirectory;
 import org.xml.sax.SAXException;
 
 import javax.xml.parsers.ParserConfigurationException;
@@ -13,8 +9,6 @@ import java.nio.file.*;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.util.Date;
 import java.util.Scanner;
-
-// TODO exceptions
 
 /**
  * Main class.
@@ -81,9 +75,6 @@ public class Main
         try {
             Logger.logDebug("test");
 
-            Path sample_dir = Paths.get("../sample_100k/");
-            Path index_dir = Paths.get("../index/");
-
             //printTitles(sample_dir);
 
             Logger.logOut("Construct index? (y)es or (n)o");
@@ -92,7 +83,7 @@ public class Main
 
             if(answer.toLowerCase().equals("y") || answer.toLowerCase().equals("yes"))
             {
-                Indexer.IndexationStats stats = Indexer.createIndex(sample_dir, index_dir, false, true);
+                Indexer.IndexationStats stats = Indexer.createIndex(Constants.PATH_DOCUMENTS, Constants.PATH_INDEX, false, true);
 
                 Logger.logOut("Indexing complete. Indexed %d/%d documents. Took %d miliseconds.", stats.completed, stats.total, stats.runtime);
             }
@@ -105,7 +96,7 @@ public class Main
             Logger.logOut("");
 
             Date search_start = new Date();
-            Searcher.SearchResult result = Searcher.search(query, 50, index_dir);
+            Searcher.SearchResult result = Searcher.search(query, 50, Constants.PATH_INDEX);
             Date search_end = new Date();
 
             Logger.logOut(
@@ -116,7 +107,7 @@ public class Main
             for (String filename : result.topResultFilenames)
             {
                 Logger.logOut("");
-                DocumentPrinter.printDocument("../sample_100k/" + filename);
+                DocumentPrinter.printDocument(Paths.get(Constants.PATH_DOCUMENTS.toString(), filename));
             }
 
         } catch(Exception e) {

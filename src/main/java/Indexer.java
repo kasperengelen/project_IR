@@ -78,6 +78,7 @@ public class Indexer
         Directory dir = FSDirectory.open(index_path);
         Analyzer analyzer = new EnglishAnalyzer();
         IndexWriterConfig iwc = new IndexWriterConfig(analyzer);
+        iwc.setSimilarity(Constants.DEFAULT_SIM_INDEXER);
 
         // performance options
 //        ConcurrentMergeScheduler x = new ConcurrentMergeScheduler();

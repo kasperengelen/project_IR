@@ -8,6 +8,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.nio.file.Paths;
 
 /**
@@ -18,9 +19,9 @@ public class DocumentPrinter
     /**
      * Print the document pointed to by the specified filename, to the standard output.
      *
-     * @param filename The filename of the document.
+     * @param file The path that points to the document.
      */
-    public static void printDocument(String filename)
+    public static void printDocument(Path file)
     {
 
         try {
@@ -31,7 +32,7 @@ public class DocumentPrinter
 
             String file_data = "<document>";
 
-            file_data += new String(Files.readAllBytes(Paths.get(filename)));
+            file_data += new String(Files.readAllBytes(file));
 
             file_data += "</document>";
 
@@ -39,12 +40,12 @@ public class DocumentPrinter
 
             saxParser.parse(file_stream, handler);
 
-            Logger.logOut("FILENAME: %s", filename);
+            Logger.logOut("FILENAME: %s", file.toString());
             Logger.logOut("TITLE: %s", handler.getTitle());
             Logger.logOut("TAGS: %s", handler.getTags());
 
         } catch (IOException | SAXException | ParserConfigurationException e) {
-            Logger.logError("Cannot print document with filename '%s': %s", filename, e.getMessage());
+            Logger.logError("Cannot print document with filename '%s': %s", file.toString(), e.getMessage());
         }
     }
 }
