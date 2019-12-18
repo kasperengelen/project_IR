@@ -4,9 +4,7 @@ import org.apache.lucene.document.Document;
 import org.apache.lucene.document.Field;
 import org.apache.lucene.document.StringField;
 import org.apache.lucene.document.TextField;
-import org.apache.lucene.index.IndexWriter;
-import org.apache.lucene.index.IndexWriterConfig;
-import org.apache.lucene.index.Term;
+import org.apache.lucene.index.*;
 import org.apache.lucene.store.Directory;
 import org.apache.lucene.store.FSDirectory;
 import org.xml.sax.SAXException;
@@ -81,7 +79,13 @@ public class Indexer
         Analyzer analyzer = new EnglishAnalyzer();
         IndexWriterConfig iwc = new IndexWriterConfig(analyzer);
 
-        iwc.setRAMBufferSizeMB(5120.0);
+        // performance options
+//        ConcurrentMergeScheduler x = new ConcurrentMergeScheduler();
+//
+//        x.setMaxMergesAndThreads(1,1);
+//        iwc.setMergeScheduler(x);
+//
+//        iwc.setRAMBufferSizeMB(5120.0);
 
         if (create_new) {
             // Create a new index in the directory, removing any
