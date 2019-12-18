@@ -27,5 +27,5 @@ public class Constants
     /**
      * Path to the directory that contains the document files.
      */
-    public static final Path PATH_DOCUMENTS = Paths.get("../sample_50k/");
+    public static final Path PATH_DOCUMENTS = Paths.get("../sample_500k/");
 }
