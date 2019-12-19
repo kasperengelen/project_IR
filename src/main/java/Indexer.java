@@ -1,5 +1,4 @@
 import org.apache.lucene.analysis.Analyzer;
-import org.apache.lucene.analysis.en.EnglishAnalyzer;
 import org.apache.lucene.document.Document;
 import org.apache.lucene.document.Field;
 import org.apache.lucene.document.StringField;
@@ -39,7 +38,7 @@ public class Indexer
         public static final String QUESTION = "question";
         public static final String TITLE = "title";
         public static final String TAGS = "tags";
-        public static final String FILENAME = "filename";
+        public static final String IDENTIFIER = "identifier";
     }
 
     /**
@@ -76,7 +75,7 @@ public class Indexer
     public static IndexationStats createIndex(Path documents_path, Path index_path, boolean create_new, boolean print_progress) throws IOException
     {
         Directory dir = FSDirectory.open(index_path);
-        Analyzer analyzer = new EnglishAnalyzer();
+        Analyzer analyzer = Utils.getAnalyzer();
         IndexWriterConfig iwc = new IndexWriterConfig(analyzer);
         iwc.setSimilarity(Constants.DEFAULT_SIM_INDEXER);
 
@@ -177,7 +176,7 @@ public class Indexer
             doc.add(new TextField(FieldNames.TAGS,     handler.getTags(),                               Field.Store.NO));
 
             // we use the filename to identify the document.
-            doc.add(new StringField(FieldNames.FILENAME, file.getFileName().toString(), Field.Store.YES));
+            doc.add(new StringField(FieldNames.IDENTIFIER, Utils.getDocumentID(file), Field.Store.YES));
 
             // add to index
             if (writer.getConfig().getOpenMode() == IndexWriterConfig.OpenMode.CREATE) {
@@ -185,7 +184,7 @@ public class Indexer
                 writer.addDocument(doc);
             } else {
                 // update existing document
-                writer.updateDocument(new Term(FieldNames.FILENAME, file.getFileName().toString()), doc);
+                writer.updateDocument(new Term(FieldNames.IDENTIFIER, Utils.getDocumentID(file)), doc);
             }
 
             return true;

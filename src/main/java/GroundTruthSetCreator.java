@@ -1,0 +1,74 @@
+import org.apache.lucene.analysis.Analyzer;
+import org.apache.lucene.analysis.TokenStream;
+import org.apache.lucene.analysis.standard.StandardAnalyzer;
+import org.apache.lucene.analysis.tokenattributes.CharTermAttribute;
+import org.xml.sax.SAXException;
+
+import javax.xml.parsers.ParserConfigurationException;
+import javax.xml.parsers.SAXParser;
+import javax.xml.parsers.SAXParserFactory;
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.PrintWriter;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.FileVisitResult;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.SimpleFileVisitor;
+import java.nio.file.attribute.BasicFileAttributes;
+
+/**
+ * Class that creates ground truth sets from a directory of documents.
+ */
+public class GroundTruthSetCreator
+{
+
+    public static void createSets(Path doc_directory, PrintWriter out) throws IOException
+    {
+        // foreach document:
+        //  tokens = document.title.tokenize()
+        //  foreach token in tokens:
+        //      write(token, document.docid)
+
+        Files.walkFileTree(doc_directory, new SimpleFileVisitor<Path>() {
+            @Override
+            public FileVisitResult visitFile(Path file, BasicFileAttributes attrs)
+            {
+                try {
+                    // parse document
+                    SAXParserFactory factory = SAXParserFactory.newInstance();
+                    SAXParser saxParser = factory.newSAXParser();
+                    DocumentXMLHandler handler = new DocumentXMLHandler();
+
+                    String file_data = "<document>";
+
+                    file_data += new String(Files.readAllBytes(file));
+
+                    file_data += "</document>";
+
+                    InputStream file_stream = new ByteArrayInputStream(file_data.getBytes(StandardCharsets.UTF_8));
+                    saxParser.parse(file_stream, handler);
+
+                    Analyzer analyzer = Utils.getAnalyzer();
+
+                    TokenStream stream = analyzer.tokenStream("??", handler.getTitle());
+                    CharTermAttribute attr = stream.addAttribute(CharTermAttribute.class);
+                    stream.reset();
+
+                    while(stream.incrementToken()) {
+                        String token_value = attr.toString();
+                        out.println(token_value + " " + file.getFileName().toString());
+                        //Logger.logDebug("%s %s", token_value, Utils.getDocumentID(file));
+                    }
+
+
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+
+                return FileVisitResult.CONTINUE;
+            }
+        });
+    }
+}

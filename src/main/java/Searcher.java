@@ -1,5 +1,4 @@
 import org.apache.lucene.analysis.Analyzer;
-import org.apache.lucene.analysis.en.EnglishAnalyzer;
 import org.apache.lucene.document.Document;
 import org.apache.lucene.index.DirectoryReader;
 import org.apache.lucene.index.IndexReader;
@@ -29,9 +28,9 @@ public class Searcher
     public static class SearchResult
     {
         /**
-         * A list of filenames of the top results.
+         * A list of document identifiers of the top results.
          */
-        public List<String> topResultFilenames = new ArrayList<>();
+        public List<String> topResultIDs = new ArrayList<>();
 
         /**
          * A map that maps filenames of the top results list, to their score.
@@ -69,10 +68,10 @@ public class Searcher
                 Indexer.FieldNames.QUESTION,
                 Indexer.FieldNames.TAGS,
                 Indexer.FieldNames.ANSWER,
-                Indexer.FieldNames.FILENAME
+                Indexer.FieldNames.IDENTIFIER
         };
 
-        Analyzer analyzer = new EnglishAnalyzer();
+        Analyzer analyzer = Utils.getAnalyzer();
         QueryParser parser = new MultiFieldQueryParser(fields, analyzer);
         Query query = parser.parse(querystring);
 
@@ -88,9 +87,9 @@ public class Searcher
         for (ScoreDoc hit : hits) {
             Document doc = searcher.doc(hit.doc);
 
-            String filename = doc.get(Indexer.FieldNames.FILENAME);
-            retval.topResultFilenames.add(filename);
-            retval.scores.put(filename, hit.score);
+            String docid = doc.get(Indexer.FieldNames.IDENTIFIER);
+            retval.topResultIDs.add(docid);
+            retval.scores.put(docid, hit.score);
         }
 
         return retval;
