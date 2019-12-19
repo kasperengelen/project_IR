@@ -26,7 +26,7 @@ import java.util.Set;
 public class GroundTruthSetCreator
 {
 
-    public static void createSets(Path doc_directory, PrintWriter out) throws IOException
+    public static void createSets(Path doc_directory, PrintWriter out_sets, PrintWriter out_terms) throws IOException
     {
         // foreach document:
         //  tokens = document.title.tokenize()
@@ -62,8 +62,10 @@ public class GroundTruthSetCreator
 
                     while(stream.incrementToken()) {
                         String token_value = attr.toString();
-                        unique_term_set.add(token_value);
-                        //out.println(token_value + " " + file.getFileName().toString());
+                        if(token_value.length() > 2) {
+                            unique_term_set.add(token_value); // add to set of unique terms
+                            out_sets.println(token_value + " " + file.getFileName().toString()); // add to output
+                        }
                         //Logger.logDebug("%s %s", token_value, Utils.getDocumentID(file));
                     }
 
@@ -78,7 +80,7 @@ public class GroundTruthSetCreator
 
         for(String unique_token : unique_term_set)
         {
-            out.println(unique_token);
+            out_terms.println(unique_token);
         }
     }
 }

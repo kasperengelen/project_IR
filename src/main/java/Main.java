@@ -163,9 +163,11 @@ public class Main
     {
         try {
 
-            PrintWriter output_file = new PrintWriter(new File("./term_set.txt"));
-            GroundTruthSetCreator.createSets(Constants.PATH_DOCUMENTS, output_file);
-
+            PrintWriter set_file = new PrintWriter(new File("./sets.txt"));
+            PrintWriter unique_terms_file = new PrintWriter(new File("./terms.txt"));
+            GroundTruthSetCreator.createSets(Constants.PATH_DOCUMENTS, set_file, unique_terms_file);
+            unique_terms_file.close();
+            set_file.close();
 //
 //            Scanner input_scanner = new Scanner(System.in);
 //
