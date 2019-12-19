@@ -17,6 +17,8 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.SimpleFileVisitor;
 import java.nio.file.attribute.BasicFileAttributes;
+import java.util.HashSet;
+import java.util.Set;
 
 /**
  * Class that creates ground truth sets from a directory of documents.
@@ -30,6 +32,8 @@ public class GroundTruthSetCreator
         //  tokens = document.title.tokenize()
         //  foreach token in tokens:
         //      write(token, document.docid)
+
+        Set<String> unique_term_set = new HashSet<>();
 
         Files.walkFileTree(doc_directory, new SimpleFileVisitor<Path>() {
             @Override
@@ -58,7 +62,8 @@ public class GroundTruthSetCreator
 
                     while(stream.incrementToken()) {
                         String token_value = attr.toString();
-                        out.println(token_value + " " + file.getFileName().toString());
+                        unique_term_set.add(token_value);
+                        //out.println(token_value + " " + file.getFileName().toString());
                         //Logger.logDebug("%s %s", token_value, Utils.getDocumentID(file));
                     }
 
@@ -70,5 +75,10 @@ public class GroundTruthSetCreator
                 return FileVisitResult.CONTINUE;
             }
         });
+
+        for(String unique_token : unique_term_set)
+        {
+            out.println(unique_token);
+        }
     }
 }

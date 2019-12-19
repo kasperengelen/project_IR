@@ -163,7 +163,7 @@ public class Main
     {
         try {
 
-            PrintWriter output_file = new PrintWriter(new File("./file_sets.txt"));
+            PrintWriter output_file = new PrintWriter(new File("./term_set.txt"));
             GroundTruthSetCreator.createSets(Constants.PATH_DOCUMENTS, output_file);
 
 //
