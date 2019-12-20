@@ -1,4 +1,5 @@
 import org.apache.lucene.benchmark.quality.*;
+import org.apache.lucene.benchmark.quality.trec.TrecJudge;
 import org.apache.lucene.benchmark.quality.utils.SimpleQQParser;
 import org.apache.lucene.benchmark.quality.utils.SubmissionReport;
 import org.apache.lucene.index.DirectoryReader;
@@ -7,15 +8,23 @@ import org.apache.lucene.search.IndexSearcher;
 import org.apache.lucene.search.similarities.Similarity;
 import org.apache.lucene.store.FSDirectory;
 
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
 import java.io.PrintWriter;
-import java.util.ArrayList;
-import java.util.List;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.util.*;
 
 /**
  * Class that performs a benchmark of the retrieval performance.
  */
 public class Benchmark
 {
+
+    StackOverflowJudge judge;
+
     /**
      * Class that contains the results of the benchmark.
      */
@@ -26,29 +35,49 @@ public class Benchmark
         // TODO add more attributes
     }
 
+    public Benchmark(){
+        try {
+            judge = new StackOverflowJudge();
+            judge.readQueries(Files.newBufferedReader(Paths.get("terms.txt"), StandardCharsets.UTF_8));
+            judge.readJudgements(Files.newBufferedReader(Paths.get("sets.txt"), StandardCharsets.UTF_8));
+        } catch (IOException e) {
+            Logger.logDebug("An error occurred while instantiating benchmark:\n%s", e.toString());
+        }
+
+    }
+
     /**
      * Perform the benchmark.
      *
      * @return The result of the benchmark.
      */
-    public static BenchmarkResult doBenchmark(boolean do_log, boolean print_results_immediately) throws Exception
-    {
-//        // open index
-//        IndexReader reader = DirectoryReader.open(FSDirectory.open(Constants.PATH_INDEX));
-//        IndexSearcher searcher = new IndexSearcher(reader);
-//
-//        // prepare queries
-//        QualityQuery[] queries = M_getQueries();
-//        // TODO what parameter for this constructor?
-//        QualityQueryParser parser = new SimpleQQParser();
-//
-//        // create logger
+    public BenchmarkResult doBenchmark(boolean do_log, boolean print_results_immediately) throws IOException {
+        // open index
+        IndexReader reader = DirectoryReader.open(FSDirectory.open(Constants.PATH_INDEX));
+        IndexSearcher searcher = new IndexSearcher(reader);
+
+        // prepare queries
+        QualityQuery[] queries = M_getQueries();
+        // TODO what parameter for this constructor?
+        QualityQueryParser parser = new SimpleQQParser("term", "question");
+
+        QualityBenchmark benchmark = new QualityBenchmark(queries, parser, searcher, "identifier");
+        try {
+            PrintWriter quality_out = new PrintWriter(new File("./quality_log.txt"));
+            QualityStats[] result = benchmark.execute(judge, null, quality_out);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        // create logger
 //        PrintWriter logger = (do_log) ? new PrintWriter(System.out) : null;
-//
-//        // prepare return value
+
+        // prepare return value
 //        BenchmarkResult retval = new BenchmarkResult();
-//
-//        // iterate over similarities and benchmark each one
+
+
+
+        // iterate over similarities and benchmark each one
 //        for(Similarity sim : M_getSimilarities())
 //        {
 //            if(logger != null) {
@@ -94,48 +123,22 @@ public class Benchmark
     /**
      * Retrieve a list of queries that will be used to measure performance.
      */
-    private static QualityQuery[] M_getQueries()
+    private QualityQuery[] M_getQueries()
     {
-        return null;
+        return judge.queries.toArray(new QualityQuery[judge.queries.size()]);
     }
 
-    /**
-     * Judge class that is used to evaluate retrieval results.
-     */
-    public static class BenchmarkJudge implements Judge
+    public static void main(String[] argv)
     {
-
-        /**
-         * Determine whether the document with the specified identifier is relevant for the query.
-         * @param docName The name of the document. This is the value contained in the document identifier {@link org.apache.lucene.document.Field}.
-         * @param query The query that retrieved the document.
-         *
-         * @return True if relevant, False if not.
-         */
-        @Override
-        public boolean isRelevant(String docName, QualityQuery query)
-        {
-            return false;
+        Logger.logDebug("Initializing benchmark");
+        Benchmark b = new Benchmark();
+        Logger.logDebug("Initialized benchmark");
+        Logger.logDebug("Started benchmark");
+        try {
+            b.doBenchmark(true, true);
+        } catch (IOException e) {
+            Logger.logDebug(e.toString());
         }
-
-
-        @Override
-        public boolean validateData(QualityQuery[] qq, PrintWriter logger)
-        {
-            return false;
-        }
-
-        /**
-         * Determine the total number of documents that are relevant for the specific query.
-         *
-         * @param query The query.
-         *
-         * @return Integer that specifies the amount of documents.
-         */
-        @Override
-        public int maxRecall(QualityQuery query)
-        {
-            return 0;
-        }
+        Logger.logDebug("Completed benchmark");
     }
 }

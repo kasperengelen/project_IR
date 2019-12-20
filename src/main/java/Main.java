@@ -163,50 +163,50 @@ public class Main
     {
         try {
 
-            PrintWriter set_file = new PrintWriter(new File("./sets.txt"));
-            PrintWriter unique_terms_file = new PrintWriter(new File("./terms.txt"));
-            GroundTruthSetCreator.createSets(Constants.PATH_DOCUMENTS, set_file, unique_terms_file);
-            unique_terms_file.close();
-            set_file.close();
-//
-//            Scanner input_scanner = new Scanner(System.in);
-//
-//            if(!do_index && prompt_user_for_index) {
-//                Logger.logOut("Construct index? (y)es or (n)o");
-//
-//                String answer = input_scanner.nextLine();
-//
-//                do_index = (answer.toLowerCase().equals("y") || answer.toLowerCase().equals("yes"));
-//            }
-//
-//            if(do_index)
-//            {
-//                Indexer.IndexationStats stats = Indexer.createIndex(Constants.PATH_DOCUMENTS, Constants.PATH_INDEX, false, true);
-//
-//                Logger.logOut("Indexing complete. Indexed %d/%d documents. Took %d miliseconds.", stats.completed, stats.total, stats.runtime);
-//            }
-//
-//            Logger.logOut("Input query:");
-//            String query = input_scanner.nextLine();
-//            Logger.logOut("");
-//
-//            Logger.logOut("Searching for '" + query + "'...");
-//            Logger.logOut("");
-//
-//            Date search_start = new Date();
-//            Searcher.SearchResult result = Searcher.search(query, result_count, Constants.PATH_INDEX);
-//            Date search_end = new Date();
-//
-//            Logger.logOut(
-//                    "Found results. Took %d miliseconds. %d results total, %d retrieved.",
-//                    search_end.getTime() - search_start.getTime(), result.totalResultCount, result.topResultIDs.size()
-//            );
-//
-//            for (String identifier : result.topResultIDs)
-//            {
-//                Logger.logOut("");
-//                DocumentPrinter.printDocument(Paths.get(Constants.PATH_DOCUMENTS.toString(), identifier + ".xml"));
-//            }
+//            PrintWriter set_file = new PrintWriter(new File("./sets.txt"));
+//            PrintWriter unique_terms_file = new PrintWriter(new File("./terms.txt"));
+//            GroundTruthSetCreator.createSets(Constants.PATH_DOCUMENTS, set_file, unique_terms_file);
+//            unique_terms_file.close();
+//            set_file.close();
+
+            Scanner input_scanner = new Scanner(System.in);
+
+            if(!do_index && prompt_user_for_index) {
+                Logger.logOut("Construct index? (y)es or (n)o");
+
+                String answer = input_scanner.nextLine();
+
+                do_index = (answer.toLowerCase().equals("y") || answer.toLowerCase().equals("yes"));
+            }
+
+            if(do_index)
+            {
+                Indexer.IndexationStats stats = Indexer.createIndex(Constants.PATH_DOCUMENTS, Constants.PATH_INDEX, false, true);
+
+                Logger.logOut("Indexing complete. Indexed %d/%d documents. Took %d miliseconds.", stats.completed, stats.total, stats.runtime);
+            }
+
+            Logger.logOut("Input query:");
+            String query = input_scanner.nextLine();
+            Logger.logOut("");
+
+            Logger.logOut("Searching for '" + query + "'...");
+            Logger.logOut("");
+
+            Date search_start = new Date();
+            Searcher.SearchResult result = Searcher.search(query, result_count, Constants.PATH_INDEX);
+            Date search_end = new Date();
+
+            Logger.logOut(
+                    "Found results. Took %d miliseconds. %d results total, %d retrieved.",
+                    search_end.getTime() - search_start.getTime(), result.totalResultCount, result.topResultIDs.size()
+            );
+
+            for (String identifier : result.topResultIDs)
+            {
+                Logger.logOut("");
+                DocumentPrinter.printDocument(Paths.get(Constants.PATH_DOCUMENTS.toString(), identifier + ".xml"));
+            }
 
         } catch(Exception e) {
             Logger.logError(e.getMessage());
@@ -222,20 +222,20 @@ public class Main
      */
     private static void M_benchmarkMode(boolean do_index, boolean print_results_immediately)
     {
-        try {
-            if (do_index) {
-                Indexer.IndexationStats stats = Indexer.createIndex(Constants.PATH_DOCUMENTS, Constants.PATH_INDEX, false, true);
-
-                Logger.logOut("Indexing complete. Indexed %d/%d documents. Took %d miliseconds.", stats.completed, stats.total, stats.runtime);
-            }
-
-            Benchmark.BenchmarkResult result = Benchmark.doBenchmark(true, print_results_immediately);
-
-            // TODO print results
-
-        } catch(Exception e) {
-            Logger.logError(e.getMessage());
-            e.printStackTrace();
-        }
+//        try {
+//            if (do_index) {
+//                Indexer.IndexationStats stats = Indexer.createIndex(Constants.PATH_DOCUMENTS, Constants.PATH_INDEX, false, true);
+//
+//                Logger.logOut("Indexing complete. Indexed %d/%d documents. Took %d miliseconds.", stats.completed, stats.total, stats.runtime);
+//            }
+//
+//            Benchmark.BenchmarkResult result = Benchmark.doBenchmark(true, print_results_immediately);
+//
+//            // TODO print results
+//
+//        } catch(Exception e) {
+//            Logger.logError(e.getMessage());
+//            e.printStackTrace();
+//        }
     }
 }
