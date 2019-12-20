@@ -184,6 +184,8 @@ public class Main
                 Indexer.IndexationStats stats = Indexer.createIndex(Constants.PATH_DOCUMENTS, Constants.PATH_INDEX, false, true);
 
                 Logger.logOut("Indexing complete. Indexed %d/%d documents. Took %d miliseconds.", stats.completed, stats.total, stats.runtime);
+
+                Utils.logHighFrequencyTerms(Constants.PATH_INDEX);
             }
 
             Logger.logOut("Input query:");
