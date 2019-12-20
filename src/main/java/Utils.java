@@ -43,10 +43,14 @@ public class Utils
             TermStats[] highFreqAnswerTerms = HighFreqTerms.getHighFreqTerms(reader, 50, "answer", cmp);
             TermStats[] highFreqTagTerms = HighFreqTerms.getHighFreqTerms(reader, 50, "tags", cmp);
 
-            PrintWriter hf_title_out = new PrintWriter(new File("./hf50_title_terms .txt"));
-            PrintWriter hf_question_out = new PrintWriter(new File("./hf50_question_terms .txt"));
-            PrintWriter hf_answer_out = new PrintWriter(new File("./hf50_answer_terms .txt"));
-            PrintWriter hf_tags_out = new PrintWriter(new File("./hf50_tag_terms .txt"));
+            File stat_dir = new File("./stats");
+
+            if (!stat_dir.exists()) {stat_dir.mkdir();};
+
+            PrintWriter hf_title_out = new PrintWriter(new File("./stats/hf50_title_terms .txt"));
+            PrintWriter hf_question_out = new PrintWriter(new File("./stats/hf50_question_terms .txt"));
+            PrintWriter hf_answer_out = new PrintWriter(new File("./stats/hf50_answer_terms .txt"));
+            PrintWriter hf_tags_out = new PrintWriter(new File("./stats/hf50_tag_terms .txt"));
 
             for (TermStats ts : highFreqTitleTerms) {
                 hf_title_out.printf("%s %d\n", ts.termtext.utf8ToString(), ts.totalTermFreq);
