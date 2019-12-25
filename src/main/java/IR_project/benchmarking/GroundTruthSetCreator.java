@@ -1,10 +1,11 @@
+package IR_project.benchmarking;
+
+import IR_project.DocumentXMLHandler;
+import IR_project.Utils;
 import org.apache.lucene.analysis.Analyzer;
 import org.apache.lucene.analysis.TokenStream;
-import org.apache.lucene.analysis.standard.StandardAnalyzer;
 import org.apache.lucene.analysis.tokenattributes.CharTermAttribute;
-import org.xml.sax.SAXException;
 
-import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.parsers.SAXParser;
 import javax.xml.parsers.SAXParserFactory;
 import java.io.ByteArrayInputStream;
@@ -66,7 +67,7 @@ public class GroundTruthSetCreator
                             unique_term_set.add(token_value); // add to set of unique terms
                             out_sets.println(token_value + " " + file.getFileName().toString()); // add to output
                         }
-                        //Logger.logDebug("%s %s", token_value, Utils.getDocumentID(file));
+                        //IR_project.Logger.logDebug("%s %s", token_value, IR_project.Utils.getDocumentID(file));
                     }
 
 

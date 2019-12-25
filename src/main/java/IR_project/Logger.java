@@ -1,3 +1,4 @@
+package IR_project;
 
 /**
  * Class that provides logging facilities.
