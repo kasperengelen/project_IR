@@ -32,17 +32,6 @@ import java.util.Date;
 public class Indexer
 {
     /**
-     * Class that contains constants for different field names.
-     */
-    public static class FieldNames
-    {
-        public static final String BODY = "body";
-        public static final String TITLE = "title";
-        public static final String TAGS = "tags";
-        public static final String IDENTIFIER = "identifier";
-    }
-
-    /**
      * Class that contains information about an indexation.
      */
     public static class IndexationStats
@@ -171,13 +160,13 @@ public class Indexer
             //       if STORE is set to false, it still can be used in queries, but it won't be returned
             //                  as the result of the search
 
-            doc.add(new TextField(FieldNames.TITLE,    handler.getTitle(),                                Field.Store.NO));
-            doc.add(new TextField(FieldNames.BODY,     handler.getQuestion() + " "
+            doc.add(new TextField(Constants.FieldNames.TITLE,    handler.getTitle(),                                Field.Store.NO));
+            doc.add(new TextField(Constants.FieldNames.BODY,     handler.getQuestion() + " "
                                                         + String.join(" ", handler.getAnswers()), Field.Store.NO));
-            doc.add(new TextField(FieldNames.TAGS,     handler.getTags(),                                 Field.Store.NO));
+            doc.add(new TextField(Constants.FieldNames.TAGS,     handler.getTags(),                                 Field.Store.NO));
 
             // we use the filename to identify the document.
-            doc.add(new StringField(FieldNames.IDENTIFIER, Utils.getDocumentID(file), Field.Store.YES));
+            doc.add(new StringField(Constants.FieldNames.IDENTIFIER, Utils.getDocumentID(file), Field.Store.YES));
 
             // add to index
             if (writer.getConfig().getOpenMode() == IndexWriterConfig.OpenMode.CREATE) {
@@ -185,7 +174,7 @@ public class Indexer
                 writer.addDocument(doc);
             } else {
                 // update existing document
-                writer.updateDocument(new Term(FieldNames.IDENTIFIER, Utils.getDocumentID(file)), doc);
+                writer.updateDocument(new Term(Constants.FieldNames.IDENTIFIER, Utils.getDocumentID(file)), doc);
             }
 
             return true;

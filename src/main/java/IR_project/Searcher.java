@@ -66,10 +66,7 @@ public class Searcher
 
         // list here all the fields that are searched
         String[] fields = {
-                Indexer.FieldNames.TITLE,
-                Indexer.FieldNames.BODY,
-                Indexer.FieldNames.TAGS,
-                Indexer.FieldNames.IDENTIFIER
+                Constants.FieldNames.BODY,
         };
 
         Analyzer analyzer = Utils.getAnalyzer();
@@ -88,7 +85,7 @@ public class Searcher
         for (ScoreDoc hit : hits) {
             Document doc = searcher.doc(hit.doc);
 
-            String docid = doc.get(Indexer.FieldNames.IDENTIFIER);
+            String docid = doc.get(Constants.FieldNames.IDENTIFIER);
             retval.topResultIDs.add(docid);
             retval.scores.put(docid, hit.score);
         }

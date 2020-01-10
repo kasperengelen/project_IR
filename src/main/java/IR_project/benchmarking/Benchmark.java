@@ -1,7 +1,6 @@
 package IR_project.benchmarking;
 
 import IR_project.Constants;
-import IR_project.Indexer;
 import IR_project.Logger;
 import org.apache.lucene.benchmark.quality.*;
 import org.apache.lucene.benchmark.quality.utils.SimpleQQParser;
@@ -61,9 +60,9 @@ public class Benchmark
         // prepare queries
         QualityQuery[] queries = M_getQueries();
         // TODO what parameter for this constructor?
-        QualityQueryParser parser = new SimpleQQParser("term", Indexer.FieldNames.BODY);
+        QualityQueryParser parser = new SimpleQQParser("term", Constants.FieldNames.BODY);
 
-        QualityBenchmark benchmark = new QualityBenchmark(queries, parser, searcher, Indexer.FieldNames.IDENTIFIER);
+        QualityBenchmark benchmark = new QualityBenchmark(queries, parser, searcher, Constants.FieldNames.IDENTIFIER);
         try {
             PrintWriter quality_out = new PrintWriter(new File("./quality_log.txt"));
             QualityStats[] result = benchmark.execute(judge, null, quality_out);
