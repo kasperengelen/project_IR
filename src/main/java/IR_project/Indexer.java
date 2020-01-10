@@ -1,3 +1,5 @@
+package IR_project;
+
 import org.apache.lucene.analysis.Analyzer;
 import org.apache.lucene.document.Document;
 import org.apache.lucene.document.Field;
@@ -34,8 +36,7 @@ public class Indexer
      */
     public static class FieldNames
     {
-        public static final String ANSWER = "answer";
-        public static final String QUESTION = "question";
+        public static final String BODY = "body";
         public static final String TITLE = "title";
         public static final String TAGS = "tags";
         public static final String IDENTIFIER = "identifier";
@@ -170,10 +171,10 @@ public class Indexer
             //       if STORE is set to false, it still can be used in queries, but it won't be returned
             //                  as the result of the search
 
-            doc.add(new TextField(FieldNames.TITLE,    handler.getTitle(),                              Field.Store.NO));
-            doc.add(new TextField(FieldNames.QUESTION, handler.getQuestion(),                           Field.Store.NO));
-            doc.add(new TextField(FieldNames.ANSWER,   String.join(" ", handler.getAnswers()),  Field.Store.NO));
-            doc.add(new TextField(FieldNames.TAGS,     handler.getTags(),                               Field.Store.NO));
+            doc.add(new TextField(FieldNames.TITLE,    handler.getTitle(),                                Field.Store.NO));
+            doc.add(new TextField(FieldNames.BODY,     handler.getQuestion() + " "
+                                                        + String.join(" ", handler.getAnswers()), Field.Store.NO));
+            doc.add(new TextField(FieldNames.TAGS,     handler.getTags(),                                 Field.Store.NO));
 
             // we use the filename to identify the document.
             doc.add(new StringField(FieldNames.IDENTIFIER, Utils.getDocumentID(file), Field.Store.YES));

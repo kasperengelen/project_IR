@@ -1,3 +1,5 @@
+package IR_project;
+
 import org.xml.sax.SAXException;
 
 import javax.xml.parsers.ParserConfigurationException;
@@ -11,7 +13,7 @@ import java.util.Date;
 import java.util.Scanner;
 
 /**
- * Main class.
+ * IR_project.Main class.
  */
 public class Main
 {
@@ -165,7 +167,7 @@ public class Main
 
 //            PrintWriter set_file = new PrintWriter(new File("./sets.txt"));
 //            PrintWriter unique_terms_file = new PrintWriter(new File("./terms.txt"));
-//            GroundTruthSetCreator.createSets(Constants.PATH_DOCUMENTS, set_file, unique_terms_file);
+//            IR_project.benchmarking.GroundTruthSetCreator.createSets(IR_project.Constants.PATH_DOCUMENTS, set_file, unique_terms_file);
 //            unique_terms_file.close();
 //            set_file.close();
 
@@ -226,17 +228,17 @@ public class Main
     {
 //        try {
 //            if (do_index) {
-//                Indexer.IndexationStats stats = Indexer.createIndex(Constants.PATH_DOCUMENTS, Constants.PATH_INDEX, false, true);
+//                IR_project.Indexer.IndexationStats stats = IR_project.Indexer.createIndex(IR_project.Constants.PATH_DOCUMENTS, IR_project.Constants.PATH_INDEX, false, true);
 //
-//                Logger.logOut("Indexing complete. Indexed %d/%d documents. Took %d miliseconds.", stats.completed, stats.total, stats.runtime);
+//                IR_project.Logger.logOut("Indexing complete. Indexed %d/%d documents. Took %d miliseconds.", stats.completed, stats.total, stats.runtime);
 //            }
 //
-//            Benchmark.BenchmarkResult result = Benchmark.doBenchmark(true, print_results_immediately);
+//            IR_project.benchmarking.Benchmark.BenchmarkResult result = IR_project.benchmarking.Benchmark.doBenchmark(true, print_results_immediately);
 //
 //            // TODO print results
 //
 //        } catch(Exception e) {
-//            Logger.logError(e.getMessage());
+//            IR_project.Logger.logError(e.getMessage());
 //            e.printStackTrace();
 //        }
     }

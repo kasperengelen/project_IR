@@ -1,3 +1,5 @@
+package IR_project;
+
 import org.apache.lucene.analysis.Analyzer;
 import org.apache.lucene.document.Document;
 import org.apache.lucene.index.DirectoryReader;
@@ -65,9 +67,8 @@ public class Searcher
         // list here all the fields that are searched
         String[] fields = {
                 Indexer.FieldNames.TITLE,
-                Indexer.FieldNames.QUESTION,
+                Indexer.FieldNames.BODY,
                 Indexer.FieldNames.TAGS,
-                Indexer.FieldNames.ANSWER,
                 Indexer.FieldNames.IDENTIFIER
         };
 

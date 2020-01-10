@@ -1,3 +1,6 @@
+package IR_project.benchmarking;
+
+import IR_project.Utils;
 import org.apache.lucene.benchmark.quality.Judge;
 import org.apache.lucene.benchmark.quality.QualityQuery;
 

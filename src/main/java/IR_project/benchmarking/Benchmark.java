@@ -1,7 +1,10 @@
+package IR_project.benchmarking;
+
+import IR_project.Constants;
+import IR_project.Indexer;
+import IR_project.Logger;
 import org.apache.lucene.benchmark.quality.*;
-import org.apache.lucene.benchmark.quality.trec.TrecJudge;
 import org.apache.lucene.benchmark.quality.utils.SimpleQQParser;
-import org.apache.lucene.benchmark.quality.utils.SubmissionReport;
 import org.apache.lucene.index.DirectoryReader;
 import org.apache.lucene.index.IndexReader;
 import org.apache.lucene.search.IndexSearcher;
@@ -10,7 +13,6 @@ import org.apache.lucene.store.FSDirectory;
 
 import java.io.File;
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.PrintWriter;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
@@ -59,9 +61,9 @@ public class Benchmark
         // prepare queries
         QualityQuery[] queries = M_getQueries();
         // TODO what parameter for this constructor?
-        QualityQueryParser parser = new SimpleQQParser("term", "question");
+        QualityQueryParser parser = new SimpleQQParser("term", Indexer.FieldNames.BODY);
 
-        QualityBenchmark benchmark = new QualityBenchmark(queries, parser, searcher, "identifier");
+        QualityBenchmark benchmark = new QualityBenchmark(queries, parser, searcher, Indexer.FieldNames.IDENTIFIER);
         try {
             PrintWriter quality_out = new PrintWriter(new File("./quality_log.txt"));
             QualityStats[] result = benchmark.execute(judge, null, quality_out);
@@ -86,7 +88,7 @@ public class Benchmark
 //
 //            // prepare benchmarker
 //            searcher.setSimilarity(sim);
-//            QualityBenchmark benchmarker = new QualityBenchmark(queries, parser, searcher, Indexer.FieldNames.FILENAME);
+//            QualityBenchmark benchmarker = new QualityBenchmark(queries, parser, searcher, IR_project.Indexer.FieldNames.FILENAME);
 //
 //            // prepare judge, logger, etc
 //            Judge judge = new BenchmarkJudge();
