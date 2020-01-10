@@ -28,7 +28,7 @@ public class Utils
      * Retrieve an instance of the analyzer used by the project.
      */
     public static Analyzer getAnalyzer() {
-        return new StandardAnalyzer();
+        return new EnglishAnalyzer();
     }
 
     public static void logHighFrequencyTerms(Path index_path) {
