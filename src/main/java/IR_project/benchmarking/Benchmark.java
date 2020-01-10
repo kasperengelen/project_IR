@@ -61,7 +61,7 @@ public class Benchmark
         // prepare queries
         QualityQuery[] queries = M_getQueries();
         // TODO what parameter for this constructor?
-        QualityQueryParser parser = new SimpleQQParser("term", Indexer.FieldNames.QUESTION);
+        QualityQueryParser parser = new SimpleQQParser("term", Indexer.FieldNames.BODY);
 
         QualityBenchmark benchmark = new QualityBenchmark(queries, parser, searcher, Indexer.FieldNames.IDENTIFIER);
         try {
