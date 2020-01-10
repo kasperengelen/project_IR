@@ -1,7 +1,5 @@
 package IR_project;
 
-import org.apache.lucene.analysis.Analyzer;
-import org.apache.lucene.analysis.standard.StandardAnalyzer;
 import org.apache.lucene.search.similarities.BM25Similarity;
 import org.apache.lucene.search.similarities.Similarity;
 
@@ -32,4 +30,15 @@ public class Constants
      * Path to the directory that contains the document files.
      */
     public static final Path PATH_DOCUMENTS = Paths.get("../sample_500k/");
+
+    /**
+     * Class that contains constants for different field names.
+     */
+    public static class FieldNames
+    {
+        public static final String BODY = "body";
+        public static final String TITLE = "title";
+        public static final String TAGS = "tags";
+        public static final String IDENTIFIER = "identifier";
+    }
 }
