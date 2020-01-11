@@ -67,6 +67,7 @@ public class Benchmark
         try {
             PrintWriter quality_out = new PrintWriter(new File("./quality_log.txt"));
             QualityStats[] result = benchmark.execute(judge, null, quality_out);
+            quality_out.close();
         } catch (Exception e) {
             e.printStackTrace();
         }
