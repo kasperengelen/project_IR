@@ -187,7 +187,7 @@ public class Main
 
                 Logger.logOut("Indexing complete. Indexed %d/%d documents. Took %d miliseconds.", stats.completed, stats.total, stats.runtime);
 
-                Utils.logHighFrequencyTerms(Constants.PATH_INDEX);
+//                Utils.logHighFrequencyTerms(Constants.PATH_INDEX);
             }
 
             Logger.logOut("Input query:");
