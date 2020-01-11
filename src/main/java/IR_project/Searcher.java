@@ -66,7 +66,6 @@ public class Searcher
 
         // list here all the fields that are searched
         String[] fields = {
-                Indexer.FieldNames.TITLE,
                 Indexer.FieldNames.BODY,
                 Indexer.FieldNames.TAGS,
                 Indexer.FieldNames.IDENTIFIER
