@@ -1,6 +1,7 @@
 package IR_project;
 
 import org.apache.lucene.analysis.Analyzer;
+import org.apache.lucene.analysis.en.EnglishAnalyzer;
 import org.apache.lucene.analysis.standard.StandardAnalyzer;
 import org.apache.lucene.index.DirectoryReader;
 import org.apache.lucene.index.IndexReader;
@@ -29,7 +30,7 @@ public class Utils
      * Retrieve an instance of the analyzer used by the project.
      */
     public static Analyzer getAnalyzer() {
-        return new StandardAnalyzer();
+        return new EnglishAnalyzer();
     }
 
     public static void logHighFrequencyTerms(Path index_path) {

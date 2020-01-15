@@ -67,6 +67,8 @@ public class Searcher
         // list here all the fields that are searched
         String[] fields = {
                 Constants.FieldNames.BODY,
+                Constants.FieldNames.TAGS,
+                Constants.FieldNames.IDENTIFIER
         };
 
         Analyzer analyzer = Utils.getAnalyzer();
