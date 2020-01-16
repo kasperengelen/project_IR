@@ -77,7 +77,7 @@ public class Main
             boolean index = false;
             boolean prompt_for_index = true;
             boolean print_imm = true;
-            int top = 50;
+            int top = 10;
 
             for (int i = 1; i < argv.length; i++) {
                 String arg = argv[i];
@@ -94,17 +94,6 @@ public class Main
 
 
                 switch (splitted[0].toLowerCase()) {
-                    case "mode":
-                        if(value.equals("search")) {
-                            mode_search = true;
-                        } else if(value.equals("benchmark")) {
-                            mode_search = false;
-                        } else {
-                            Logger.logError("Invalid mode name '%s'", splitted[1]);
-                            return;
-                        }
-
-                        break;
                     case "index":
                         if(value.equals("true")) {
                             index = true;
@@ -142,11 +131,7 @@ public class Main
                 }
             }
 
-            if (mode_search) {
-                M_searchMode(index, prompt_for_index, top);
-            } else {
-                M_benchmarkMode(index, print_imm);
-            }
+            M_searchMode(index, prompt_for_index, top);
 
         } catch(Exception e) {
             Logger.logError(e.getMessage());
@@ -165,13 +150,9 @@ public class Main
     {
         try {
 
-//            PrintWriter set_file = new PrintWriter(new File("./sets.txt"));
-//            PrintWriter unique_terms_file = new PrintWriter(new File("./terms.txt"));
-//            IR_project.benchmarking.GroundTruthSetCreator.createSets(IR_project.Constants.PATH_DOCUMENTS, set_file, unique_terms_file);
-//            unique_terms_file.close();
-//            set_file.close();
 
             Scanner input_scanner = new Scanner(System.in);
+            Searcher searcher = new Searcher();
 
             if(!do_index && prompt_user_for_index) {
                 Logger.logOut("Construct index? (y)es or (n)o");
@@ -187,7 +168,6 @@ public class Main
 
                 Logger.logOut("Indexing complete. Indexed %d/%d documents. Took %d miliseconds.", stats.completed, stats.total, stats.runtime);
 
-//                Utils.logHighFrequencyTerms(Constants.PATH_INDEX);
             }
 
             Logger.logOut("Input query:");
@@ -198,7 +178,7 @@ public class Main
             Logger.logOut("");
 
             Date search_start = new Date();
-            Searcher.SearchResult result = Searcher.search(query, result_count, Constants.PATH_INDEX);
+            Searcher.SearchResult result = searcher.search(query, result_count);
             Date search_end = new Date();
 
             Logger.logOut(
@@ -209,7 +189,8 @@ public class Main
             for (String identifier : result.topResultIDs)
             {
                 Logger.logOut("");
-                DocumentPrinter.printDocument(Paths.get(Constants.PATH_DOCUMENTS.toString(), identifier + ".xml"));
+                Logger.logOut(identifier);
+//                DocumentPrinter.printDocument(Paths.get(Constants.PATH_DOCUMENTS.toString(), identifier + ".xml"));
             }
 
         } catch(Exception e) {
@@ -218,28 +199,5 @@ public class Main
         }
     }
 
-    /**
-     * Run the benchmark mode of the program.
-     *
-     * @param do_index True if the index needs to be (re)created.
-     * @param print_results_immediately True if results are immediately printed for each similarity, false otherwise.
-     */
-    private static void M_benchmarkMode(boolean do_index, boolean print_results_immediately)
-    {
-//        try {
-//            if (do_index) {
-//                IR_project.Indexer.IndexationStats stats = IR_project.Indexer.createIndex(IR_project.Constants.PATH_DOCUMENTS, IR_project.Constants.PATH_INDEX, false, true);
-//
-//                IR_project.Logger.logOut("Indexing complete. Indexed %d/%d documents. Took %d miliseconds.", stats.completed, stats.total, stats.runtime);
-//            }
-//
-//            IR_project.benchmarking.Benchmark.BenchmarkResult result = IR_project.benchmarking.Benchmark.doBenchmark(true, print_results_immediately);
-//
-//            // TODO print results
-//
-//        } catch(Exception e) {
-//            IR_project.Logger.logError(e.getMessage());
-//            e.printStackTrace();
-//        }
-    }
+
 }

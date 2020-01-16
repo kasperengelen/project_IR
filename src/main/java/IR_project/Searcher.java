@@ -6,6 +6,7 @@ import org.apache.lucene.index.DirectoryReader;
 import org.apache.lucene.index.IndexReader;
 import org.apache.lucene.queryparser.classic.ParseException;
 import org.apache.lucene.search.*;
+import org.apache.lucene.search.similarities.Similarity;
 import org.apache.lucene.store.FSDirectory;
 import org.apache.lucene.util.QueryBuilder;
 
@@ -57,21 +58,40 @@ public class Searcher
         boolean totalCountIsExact;
     }
 
-    public static SearchResult search(String querystring, int top_count, Path index_path) throws IOException, ParseException
+    private IndexReader reader;
+    private IndexSearcher searcher;
+    private Analyzer analyzer;
+    private QueryBuilder builder;
+
+    public Searcher() {
+        try {
+            reader = DirectoryReader.open(FSDirectory.open(Constants.PATH_INDEX));
+            searcher = new IndexSearcher(reader);
+            searcher.setSimilarity(Constants.DEFAULT_SIM);
+            analyzer = Utils.getAnalyzer();
+            builder = new QueryBuilder(analyzer);
+        } catch (IOException e) {
+            e.printStackTrace();
+            System.exit(-1);
+        }
+    }
+
+    public Searcher(Path index, Similarity sim) {
+        try {
+            reader = DirectoryReader.open(FSDirectory.open(index));
+            searcher = new IndexSearcher(reader);
+            searcher.setSimilarity(sim);
+            analyzer = Utils.getAnalyzer();
+            builder = new QueryBuilder(analyzer);
+        } catch (IOException e) {
+            e.printStackTrace();
+            System.exit(-1);
+        }
+    }
+
+    public SearchResult search(String querystring, int top_count) throws IOException, ParseException
     {
-        IndexReader reader = DirectoryReader.open(FSDirectory.open(index_path));
-        IndexSearcher searcher = new IndexSearcher(reader);
-        searcher.setSimilarity(Constants.DEFAULT_SIM_SEARCHER);
 
-        // list here all the fields that are searched
-        String[] fields = {
-                Indexer.FieldNames.BODY
-//                Indexer.FieldNames.TAGS,
-//                Indexer.FieldNames.IDENTIFIER
-        };
-
-        Analyzer analyzer = Utils.getAnalyzer();
-        QueryBuilder builder = new QueryBuilder(analyzer);
         Query query = builder.createBooleanQuery("body", querystring);
 
         TopDocs results = searcher.search(query, top_count);
