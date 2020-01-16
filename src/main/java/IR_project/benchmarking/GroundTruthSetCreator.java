@@ -23,6 +23,15 @@ import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
 
+
+//            PrintWriter set_file = new PrintWriter(new File("./sets.txt"));
+//            PrintWriter unique_terms_file = new PrintWriter(new File("./terms.txt"));
+//            IR_project.benchmarking.GroundTruthSetCreator.createSets(IR_project.Constants.PATH_DOCUMENTS, set_file, unique_terms_file);
+//            unique_terms_file.close();
+//            set_file.close();
+//
+//            System.exit(0);
+
 /**
  * Class that creates ground truth sets from a directory of documents.
  */
