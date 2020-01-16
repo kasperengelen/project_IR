@@ -4,11 +4,10 @@ import org.apache.lucene.analysis.Analyzer;
 import org.apache.lucene.document.Document;
 import org.apache.lucene.index.DirectoryReader;
 import org.apache.lucene.index.IndexReader;
-import org.apache.lucene.queryparser.classic.MultiFieldQueryParser;
 import org.apache.lucene.queryparser.classic.ParseException;
-import org.apache.lucene.queryparser.classic.QueryParser;
 import org.apache.lucene.search.*;
 import org.apache.lucene.store.FSDirectory;
+import org.apache.lucene.util.QueryBuilder;
 
 import java.io.IOException;
 import java.nio.file.Path;
@@ -66,14 +65,14 @@ public class Searcher
 
         // list here all the fields that are searched
         String[] fields = {
-                Indexer.FieldNames.BODY,
-                Indexer.FieldNames.TAGS,
-                Indexer.FieldNames.IDENTIFIER
+                Indexer.FieldNames.BODY
+//                Indexer.FieldNames.TAGS,
+//                Indexer.FieldNames.IDENTIFIER
         };
 
         Analyzer analyzer = Utils.getAnalyzer();
-        QueryParser parser = new MultiFieldQueryParser(fields, analyzer);
-        Query query = parser.parse(querystring);
+        QueryBuilder builder = new QueryBuilder(analyzer);
+        Query query = builder.createBooleanQuery("body", querystring);
 
         TopDocs results = searcher.search(query, top_count);
         ScoreDoc[] hits = results.scoreDocs;
