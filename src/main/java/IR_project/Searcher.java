@@ -4,11 +4,10 @@ import org.apache.lucene.analysis.Analyzer;
 import org.apache.lucene.document.Document;
 import org.apache.lucene.index.DirectoryReader;
 import org.apache.lucene.index.IndexReader;
-import org.apache.lucene.queryparser.classic.MultiFieldQueryParser;
-import org.apache.lucene.queryparser.classic.ParseException;
-import org.apache.lucene.queryparser.classic.QueryParser;
 import org.apache.lucene.search.*;
+import org.apache.lucene.search.similarities.Similarity;
 import org.apache.lucene.store.FSDirectory;
+import org.apache.lucene.util.QueryBuilder;
 
 import java.io.IOException;
 import java.nio.file.Path;
@@ -58,20 +57,41 @@ public class Searcher
         boolean totalCountIsExact;
     }
 
-    public static SearchResult search(String querystring, int top_count, Path index_path) throws IOException, ParseException
+    private IndexReader reader;
+    private IndexSearcher searcher;
+    private Analyzer analyzer;
+    private QueryBuilder builder;
+
+    public Searcher() {
+        try {
+            reader = DirectoryReader.open(FSDirectory.open(Constants.PATH_INDEX));
+            searcher = new IndexSearcher(reader);
+            searcher.setSimilarity(Constants.DEFAULT_SIM);
+            analyzer = Utils.getAnalyzer();
+            builder = new QueryBuilder(analyzer);
+        } catch (IOException e) {
+            e.printStackTrace();
+            System.exit(-1);
+        }
+    }
+
+    public Searcher(Path index, Similarity sim) {
+        try {
+            reader = DirectoryReader.open(FSDirectory.open(index));
+            searcher = new IndexSearcher(reader);
+            searcher.setSimilarity(sim);
+            analyzer = Utils.getAnalyzer();
+            builder = new QueryBuilder(analyzer);
+        } catch (IOException e) {
+            e.printStackTrace();
+            System.exit(-1);
+        }
+    }
+
+    public SearchResult search(String querystring, int top_count) throws IOException, ParseException
     {
-        IndexReader reader = DirectoryReader.open(FSDirectory.open(index_path));
-        IndexSearcher searcher = new IndexSearcher(reader);
-        searcher.setSimilarity(Constants.DEFAULT_SIM_SEARCHER);
 
-        // list here all the fields that are searched
-        String[] fields = {
-                Constants.FieldNames.BODY,
-        };
-
-        Analyzer analyzer = Utils.getAnalyzer();
-        QueryParser parser = new MultiFieldQueryParser(fields, analyzer);
-        Query query = parser.parse(querystring);
+        Query query = builder.createBooleanQuery("body", querystring);
 
         TopDocs results = searcher.search(query, top_count);
         ScoreDoc[] hits = results.scoreDocs;

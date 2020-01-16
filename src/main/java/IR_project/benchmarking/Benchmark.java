@@ -1,22 +1,16 @@
 package IR_project.benchmarking;
 
-import IR_project.Constants;
 import IR_project.Logger;
-import org.apache.lucene.benchmark.quality.*;
-import org.apache.lucene.benchmark.quality.utils.SimpleQQParser;
-import org.apache.lucene.index.DirectoryReader;
-import org.apache.lucene.index.IndexReader;
-import org.apache.lucene.search.IndexSearcher;
-import org.apache.lucene.search.similarities.Similarity;
-import org.apache.lucene.store.FSDirectory;
+import IR_project.Searcher;
+import IR_project.Utils;
+import org.apache.lucene.search.similarities.BM25Similarity;
+import org.apache.lucene.search.similarities.ClassicSimilarity;
+import org.apache.lucene.search.similarities.LMJelinekMercerSimilarity;
+import org.apache.lucene.search.similarities.LMDirichletSimilarity;
 
-import java.io.File;
-import java.io.IOException;
-import java.io.PrintWriter;
-import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
+import java.io.*;
 import java.nio.file.Paths;
-import java.util.*;
+
 
 /**
  * Class that performs a benchmark of the retrieval performance.
@@ -24,123 +18,62 @@ import java.util.*;
 public class Benchmark
 {
 
-    StackOverflowJudge judge;
-
-    /**
-     * Class that contains the results of the benchmark.
-     */
-    public static class BenchmarkResult
-    {
-        public float precision;
-        public float recall;
-        // TODO add more attributes
-    }
-
-    public Benchmark(){
+    public static void titleQueryBM(Searcher s, String sim) {
+        // Open ground truth
         try {
-            judge = new StackOverflowJudge();
-            judge.readQueries(Files.newBufferedReader(Paths.get("terms.txt"), StandardCharsets.UTF_8));
-            judge.readJudgements(Files.newBufferedReader(Paths.get("sets.txt"), StandardCharsets.UTF_8));
-        } catch (IOException e) {
-            Logger.logDebug("An error occurred while instantiating benchmark:\n%s", e.toString());
-        }
+            BufferedReader br = new BufferedReader(new FileReader("./groundTruth/titleToDoc.txt"));
 
-    }
+            PrintWriter rank_out = new PrintWriter(new File("./titleQueryRank" + sim + ".txt"));
 
-    /**
-     * Perform the benchmark.
-     *
-     * @return The result of the benchmark.
-     */
-    public BenchmarkResult doBenchmark(boolean do_log, boolean print_results_immediately) throws IOException {
-        // open index
-        IndexReader reader = DirectoryReader.open(FSDirectory.open(Constants.PATH_INDEX));
-        IndexSearcher searcher = new IndexSearcher(reader);
+            String line;
+            int count = 1;
+            while ((line = br.readLine()) != null) {
 
-        // prepare queries
-        QualityQuery[] queries = M_getQueries();
-        // TODO what parameter for this constructor?
-        QualityQueryParser parser = new SimpleQQParser("term", Constants.FieldNames.BODY);
+                int splitIdx = line.lastIndexOf('|');
+                String query = line.substring(0, splitIdx-1);
+                String docID = line.substring(splitIdx+2).toLowerCase().replace(".xml", "").toUpperCase();
 
-        QualityBenchmark benchmark = new QualityBenchmark(queries, parser, searcher, Constants.FieldNames.IDENTIFIER);
-        try {
-            PrintWriter quality_out = new PrintWriter(new File("./quality_log.txt"));
-            QualityStats[] result = benchmark.execute(judge, null, quality_out);
-            quality_out.close();
+                Searcher.SearchResult result = s.search(query, 20);
+                int rank = result.topResultIDs.indexOf(docID) + 1;
+                rank_out.println(rank);
+
+                if (count % 1000 == 0) {
+                    Logger.logDebug("Processed %d queries", count);
+                    rank_out.flush();
+                }
+                count++;
+            }
+
+            rank_out.close();
+
         } catch (Exception e) {
             e.printStackTrace();
+            System.exit(-1);
         }
-
-        // create logger
-//        PrintWriter logger = (do_log) ? new PrintWriter(System.out) : null;
-
-        // prepare return value
-//        BenchmarkResult retval = new BenchmarkResult();
-
-
-
-        // iterate over similarities and benchmark each one
-//        for(Similarity sim : M_getSimilarities())
-//        {
-//            if(logger != null) {
-//                logger.println(String.format("Starting benchmark for Similarity implementation '%s'", sim.getClass().toString()));
-//            }
-//
-//            // prepare benchmarker
-//            searcher.setSimilarity(sim);
-//            QualityBenchmark benchmarker = new QualityBenchmark(queries, parser, searcher, IR_project.Indexer.FieldNames.FILENAME);
-//
-//            // prepare judge, logger, etc
-//            Judge judge = new BenchmarkJudge();
-//            SubmissionReport rep = new SubmissionReport(logger, "SIM_" + sim.getClass().toString());
-//
-//            // run benchmark
-//            QualityStats[] results = benchmarker.execute(judge, rep, logger);
-//
-//            // process results
-//            QualityStats avg = QualityStats.average(results);
-//
-//            // TODO process results
-//
-//            // TODO print results immediately if needed
-//        }
-//
-//        if(logger != null) {
-//            logger.flush();
-//            logger.close();
-//        }
-//
-//        return retval;
-        return null;
-    }
-
-    /**
-     * Retrieve a list of similarities that need to be evaluated.
-     */
-    private static List<Similarity> M_getSimilarities()
-    {
-        return new ArrayList<>();
-    }
-
-    /**
-     * Retrieve a list of queries that will be used to measure performance.
-     */
-    private QualityQuery[] M_getQueries()
-    {
-        return judge.queries.toArray(new QualityQuery[judge.queries.size()]);
     }
 
     public static void main(String[] argv)
     {
-        Logger.logDebug("Initializing benchmark");
-        Benchmark b = new Benchmark();
-        Logger.logDebug("Initialized benchmark");
-        Logger.logDebug("Started benchmark");
-        try {
-            b.doBenchmark(true, true);
-        } catch (IOException e) {
-            Logger.logDebug(e.toString());
-        }
-        Logger.logDebug("Completed benchmark");
+        Logger.logDebug("Initializing search engines");
+//        Searcher s1 = new Searcher(Paths.get("../index/"), new BM25Similarity());
+        Searcher s2 = new Searcher(Paths.get("../index1/"), new ClassicSimilarity());
+//        Searcher s3 = new Searcher(Paths.get("../index2/"), new LMJelinekMercerSimilarity((float) 0.8));
+//        Searcher s4 = new Searcher(Paths.get("../index3/"),  new LMDirichletSimilarity((float) 0.8));
+
+//        Logger.logDebug("Started BM25 benchmark");
+//        titleQueryBM(s1, "BM25");
+//        Logger.logDebug("Completed BM25 benchmark");
+
+        Logger.logDebug("Started TF-IDF benchmark");
+        titleQueryBM(s2, "TD-IDF");
+        Logger.logDebug("Completed TF-IDF benchmark");
+
+//        Logger.logDebug("Started LM Jelinek-Mercer benchmark");
+//        titleQueryBM(s3, "LMJM");
+//        Logger.logDebug("Completed LM Jelinek-Mercer benchmark");
+
+//        Logger.logDebug("Started LM Dirichlet benchmark");
+//        titleQueryBM(s4, "LMD");
+//        Logger.logDebug("Completed LM Dirichlet benchmark");
     }
 }

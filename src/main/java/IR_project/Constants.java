@@ -15,21 +15,12 @@ import java.nio.file.Paths;
 public class Constants
 {
     /**
-     * The default similarity that will be used for indexing.
+     * The default similarity that will be used
      */
-    public static final Similarity DEFAULT_SIM_INDEXER = new BM25Similarity();
-//    public static final Similarity DEFAULT_SIM_INDEXER = new ClassicSimilarity();
-//    public static final Similarity DEFAULT_SIM_INDEXER = new LMJelinekMercerSimilarity((float) 0.8);
-//    public static final Similarity DEFAULT_SIM_INDEXER = new LMDirichletSimilarity((float) 0.8);
-
-    /**
-     * The default similarity that will be used for searching.
-     */
-    public static final Similarity DEFAULT_SIM_SEARCHER = new BM25Similarity();
-//    public static final Similarity DEFAULT_SIM_SEARCHER = new ClassicSimilarity();
-//    public static final Similarity DEFAULT_SIM_SEARCHER = new LMJelinekMercerSimilarity((float) 0.8);
-//    public static final Similarity DEFAULT_SIM_SEARCHER = new LMDirichletSimilarity((float) 0.8);
-
+    public static final Similarity DEFAULT_SIM = new BM25Similarity();
+//    public static final Similarity DEFAULT_SIM = new ClassicSimilarity();
+//    public static final Similarity DEFAULT_SIM = new LMJelinekMercerSimilarity((float) 0.8);
+//    public static final Similarity DEFAULT_SIM = new LMDirichletSimilarity((float) 0.8);
     /**
      * Path to the directory that contains the index files.
      */
