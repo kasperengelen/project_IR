@@ -15,6 +15,7 @@ import java.util.Map;
 
 /**
  * https://github.com/uiucGSLIS/ir-tools/blob/master/src/main/java/edu/gslis/lucene/expansion/Rocchio.java
+ * // TODO other source
  */
 public class Rocchio
 {
