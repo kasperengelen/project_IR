@@ -1,6 +1,5 @@
 package IR_project;
 
-import com.sun.xml.internal.bind.v2.runtime.reflect.opt.Const;
 import org.apache.lucene.analysis.Analyzer;
 import org.apache.lucene.analysis.TokenStream;
 import org.apache.lucene.analysis.tokenattributes.CharTermAttribute;
@@ -55,13 +54,12 @@ public class Rocchio
      *
      * @return The adjusted query.
      */
-    public Query adjustQuery(String old_query, List<Integer> relevant_set, List<Integer> non_relevant_set, IndexReader reader) throws IOException
+    public RocchioQuery adjustQuery(RocchioQuery old_query, List<Integer> relevant_set, List<Integer> non_relevant_set, IndexReader reader) throws IOException
     {
         // retval = a * old_query + b * relevant_set + c * non_relevant_set
         Map<String, Double> new_query_weights = new HashMap<>();
 
-        Map<String, Double> orig_query_weights = M_getQueryWeights(old_query, Utils.getAnalyzer());
-        for(Map.Entry<String, Double> entry : orig_query_weights.entrySet())
+        for(Map.Entry<String, Double> entry : old_query.weights().entrySet())
         {
             String term = entry.getKey();
 
@@ -105,7 +103,7 @@ public class Rocchio
         // filter away all zero-weight terms
         new_query_weights.values().removeIf(f -> f < 0.05f);
 
-        return M_weightMapToQuery(new_query_weights); // TODO make this into a custom query object that saves current weights, so that we can do multiple rocchio iteration
+        return new RocchioQuery(new_query_weights);
     }
 
     /**
@@ -188,33 +186,6 @@ public class Rocchio
             double weight = idf * (x / y);
 
             retval.put(term, weight);
-        }
-
-        return retval;
-    }
-
-    /**
-     * Given the query contents in the form of a {@link String} and an {@link Analyzer} that will analyze the string, construct a
-     * term-weight map. Each term in the map is mapped to the weight that it holds in the query.
-     *
-     */
-    private Map<String, Double> M_getQueryWeights(String query_text, Analyzer query_analyzer) throws IOException
-    {
-
-        Map<String, Double> retval = new HashMap<>();
-
-        TokenStream tokens = query_analyzer.tokenStream(Constants.FieldNames.BODY, query_text);
-        CharTermAttribute attr = tokens.addAttribute(CharTermAttribute.class);
-        tokens.reset();
-
-        while(tokens.incrementToken())
-        {
-            String term = attr.toString();
-
-            // for each occurrence, increment weight by one
-            double old_weight = (retval.containsKey(term)) ? retval.get(term) : 0;
-            // TODO weights can be at most one, since we cannot use BM25 otherwise!
-            retval.put(term, old_weight + 1);
         }
 
         return retval;
