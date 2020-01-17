@@ -3,7 +3,8 @@ package IR_project;
 import org.apache.lucene.analysis.Analyzer;
 import org.apache.lucene.analysis.TokenStream;
 import org.apache.lucene.analysis.tokenattributes.CharTermAttribute;
-import org.apache.lucene.search.Query;
+import org.apache.lucene.index.Term;
+import org.apache.lucene.search.*;
 
 import java.io.IOException;
 import java.util.HashMap;
@@ -53,8 +54,21 @@ public class RocchioQuery
         return m_weights;
     }
 
+    /**
+     * Convert the {@link RocchioQuery} object into a Lucene {@link Query} object.
+     */
     public Query toLuceneQuery()
     {
-        return null;
+        BooleanQuery.Builder retval = new BooleanQuery.Builder();
+
+        for(Map.Entry<String, Double> entry : m_weights.entrySet())
+        {
+            Query term_query = new TermQuery(new Term(Constants.FieldNames.BODY, entry.getKey()));
+            Query boosted_query = new BoostQuery(term_query, entry.getValue().floatValue());
+
+            retval.add(boosted_query, BooleanClause.Occur.SHOULD);
+        }
+
+        return retval.build();
     }
 }

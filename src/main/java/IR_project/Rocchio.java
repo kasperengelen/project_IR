@@ -190,24 +190,4 @@ public class Rocchio
 
         return retval;
     }
-
-    /**
-     * Convert a map of term-weights to a query.
-     *
-     * @param weight_map The term-weight map.
-     */
-    private BooleanQuery M_weightMapToQuery(Map<String, Double> weight_map)
-    {
-        BooleanQuery.Builder retval = new BooleanQuery.Builder();
-
-        for(Map.Entry<String, Double> entry : weight_map.entrySet())
-        {
-            Query term_query = new TermQuery(new Term(Constants.FieldNames.BODY, entry.getKey()));
-            Query boosted_query = new BoostQuery(term_query, entry.getValue().floatValue());
-
-            retval.add(boosted_query, BooleanClause.Occur.SHOULD);
-        }
-
-        return retval.build();
-    }
 }
