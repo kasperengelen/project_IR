@@ -41,7 +41,7 @@ public class Searcher
         /**
          * The requested amount of results.
          */
-        int requestedTop;
+        public int requestedTop;
 
         /**
          * The total amount of results. This can be either the exact value or it is a lower bound.
@@ -49,12 +49,17 @@ public class Searcher
          * Note: this is stored as an integer since the total amount of documents in the index fits in
          * an integer.
          */
-        int totalResultCount;
+        public int totalResultCount;
 
         /**
          * True if the total result count is exact, false if it is a lower bound.
          */
-        boolean totalCountIsExact;
+        public boolean totalCountIsExact;
+
+        /**
+         * Map that converts stackoverflow question ID's to lucene document id's.
+         */
+        public Map<String, Integer> docIdentifierToInternalId;
     }
 
     private IndexReader reader;
@@ -88,11 +93,22 @@ public class Searcher
         }
     }
 
+    /**
+     * Search for the top-k documents corresponding to the specified query.
+     *
+     * The query will be constructed as a {@link BooleanQuery} from the specified query string.
+     */
     public SearchResult search(String querystring, int top_count) throws IOException
     {
-
         Query query = builder.createBooleanQuery("body", querystring);
+        return search(query, top_count);
+    }
 
+    /**
+     * Search for the top-k documents corresponding to the specified query.
+     */
+    public SearchResult search(Query query, int top_count) throws IOException
+    {
         TopDocs results = searcher.search(query, top_count);
         ScoreDoc[] hits = results.scoreDocs;
 
@@ -107,9 +123,15 @@ public class Searcher
 
             String docid = doc.get(Constants.FieldNames.IDENTIFIER);
             retval.topResultIDs.add(docid);
+            retval.docIdentifierToInternalId.put(docid, hit.doc);
             retval.scores.put(docid, hit.score);
         }
 
         return retval;
+    }
+
+    public IndexReader getIndexReader()
+    {
+        return reader;
     }
 }
