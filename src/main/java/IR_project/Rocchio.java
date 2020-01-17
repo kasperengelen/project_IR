@@ -1,12 +1,11 @@
 package IR_project;
 
+import com.sun.xml.internal.bind.v2.runtime.reflect.opt.Const;
 import org.apache.lucene.analysis.Analyzer;
-import org.apache.lucene.document.Document;
+import org.apache.lucene.analysis.TokenStream;
+import org.apache.lucene.analysis.tokenattributes.CharTermAttribute;
 import org.apache.lucene.index.*;
-import org.apache.lucene.queryparser.classic.MultiFieldQueryParser;
-import org.apache.lucene.queryparser.classic.ParseException;
-import org.apache.lucene.queryparser.classic.QueryParser;
-import org.apache.lucene.search.Query;
+import org.apache.lucene.search.*;
 
 import java.io.IOException;
 import java.util.HashMap;
@@ -14,24 +13,99 @@ import java.util.List;
 import java.util.Map;
 
 /**
+ * SOURCES:
  * https://github.com/uiucGSLIS/ir-tools/blob/master/src/main/java/edu/gslis/lucene/expansion/Rocchio.java
- * // TODO other source
+ * https://www.baeldung.com/lucene-analyzers
  */
 public class Rocchio
 {
+    private double m_alpha;
+    private double m_beta;
+    private double m_gamma;
+
+    private double m_BM25k1;
+    private double m_BM25b;
+
+    /**
+     * Initialise the parameters for Rocchio relevance feedback using BM25 weights.
+     *
+     * @param alpha The alpha parameter for the Rocchio algorithm.
+     * @param beta The alpha parameter for the Rocchio algorithm.
+     * @param gamma The alpha parameter for the Rocchio algorithm.
+     *
+     * @param bm25_k1 The k1 parameter for the BM25 algorithm.
+     * @param bm25_b The b parameter for the BM25 algorithm.
+     */
+    public Rocchio(double alpha, double beta, double gamma, double bm25_k1, double bm25_b)
+    {
+        m_alpha = alpha;
+        m_beta = beta;
+        m_gamma = gamma;
+
+        m_BM25k1 = bm25_k1;
+        m_BM25b = bm25_b;
+    }
+
     /**
      * Adjust the specified query to the set of relevant and irrelevant documents.
      *
      * @param old_query The original query.
-     * @param relevant_set A list of documents that have been marked as relevant.
-     * @param non_relevant_set A list of documents that have been marked as irrelevant.
+     * @param relevant_set A list of document ids that have been marked as relevant.
+     * @param non_relevant_set A list of document ids that have been marked as irrelevant.
      *
      * @return The adjusted query.
      */
-    public static Query adjustQuery(Query old_query, double a, List<Document> relevant_set, double b, List<Document> non_relevant_set, double c)
+    public Query adjustQuery(String old_query, List<Integer> relevant_set, List<Integer> non_relevant_set, IndexReader reader) throws IOException
     {
         // retval = a * old_query + b * relevant_set + c * non_relevant_set
-        return null;
+        Map<String, Double> new_query_weights = new HashMap<>();
+
+        Map<String, Double> orig_query_weights = M_getQueryWeights(old_query, Utils.getAnalyzer());
+        for(Map.Entry<String, Double> entry : orig_query_weights.entrySet())
+        {
+            String term = entry.getKey();
+
+            // retrieve old weight that is currently in the map
+            double old_weight = (new_query_weights.containsKey(term)) ? new_query_weights.get(term) : 0;
+
+            // increment old weight with new weight
+            new_query_weights.put(term, old_weight + entry.getValue() * m_alpha);
+        }
+
+        for(Integer relevant_id : relevant_set) {
+            DocStats doc_info = M_getTermFreqForDoc(relevant_id, reader);
+
+            for(Map.Entry<String, Double> entry : M_termFreqToBM25Weights(doc_info.docFreq, doc_info.docLength, reader).entrySet())
+            {
+                String term = entry.getKey();
+
+                // retrieve old weight that is currently in the map
+                double old_weight = (new_query_weights.containsKey(term)) ? new_query_weights.get(term) : 0;
+
+                // increment old weight with new weight
+                new_query_weights.put(term, old_weight + entry.getValue() * m_beta);
+            }
+        }
+
+        for(Integer non_relevant_id : non_relevant_set) {
+            DocStats doc_info = M_getTermFreqForDoc(non_relevant_id, reader);
+
+            for(Map.Entry<String, Double> entry : M_termFreqToBM25Weights(doc_info.docFreq, doc_info.docLength, reader).entrySet())
+            {
+                String term = entry.getKey();
+
+                // retrieve old weight that is currently in the map
+                double old_weight = (new_query_weights.containsKey(term)) ? new_query_weights.get(term) : 0;
+
+                // increment old weight with new weight
+                new_query_weights.put(term, old_weight + entry.getValue() * m_gamma);
+            }
+        }
+
+        // filter away all zero-weight terms
+        new_query_weights.values().removeIf(f -> f < 0.05f);
+
+        return M_weightMapToQuery(new_query_weights); // TODO make this into a custom query object that saves current weights, so that we can do multiple rocchio iteration
     }
 
     /**
@@ -56,7 +130,7 @@ public class Rocchio
      * @param doc_id The numerical identifier of a document.
      * @param index_reader The index reader that points to the index.
      */
-    private static DocStats M_getTermFreqForDoc(int doc_id, IndexReader index_reader) throws IOException
+    private DocStats M_getTermFreqForDoc(int doc_id, IndexReader index_reader) throws IOException
     {
         Map<String, Long> freq_map = new HashMap<>();
 
@@ -84,7 +158,7 @@ public class Rocchio
     /**
      * Given a term-frequency map, construct a map that gives the BM25 weight for a term.
      */
-    private static Map<String, Double> M_termFreqToBM25Weights(Map<String, Long> term_freq_map, double doc_length, double k1, double b, IndexReader reader) throws IOException
+    private Map<String, Double> M_termFreqToBM25Weights(Map<String, Long> term_freq_map, double doc_length, IndexReader reader) throws IOException
     {
         Map<String, Double> retval = new HashMap<>();
 
@@ -107,8 +181,8 @@ public class Rocchio
             double idf = Math.log(N / df);
 
             // calculate BM25 formula
-            double x = (k1 + 1) * tf;
-            double y = k1 * ((1-b) + b * (doc_length / avg_doc_len)) + tf;
+            double x = (m_BM25k1 + 1) * tf;
+            double y = m_BM25k1 * ((1-m_BM25b) + m_BM25b * (doc_length / avg_doc_len)) + tf;
 
             // determine final weight
             double weight = idf * (x / y);
@@ -120,34 +194,49 @@ public class Rocchio
     }
 
     /**
-     * Given a query, construct a term-weight map.
+     * Given the query contents in the form of a {@link String} and an {@link Analyzer} that will analyze the string, construct a
+     * term-weight map. Each term in the map is mapped to the weight that it holds in the query.
+     *
      */
-    private static Map<String, Double> M_getQueryWeights(Query query)
+    private Map<String, Double> M_getQueryWeights(String query_text, Analyzer query_analyzer) throws IOException
     {
-        return null;
+
+        Map<String, Double> retval = new HashMap<>();
+
+        TokenStream tokens = query_analyzer.tokenStream(Constants.FieldNames.BODY, query_text);
+        CharTermAttribute attr = tokens.addAttribute(CharTermAttribute.class);
+        tokens.reset();
+
+        while(tokens.incrementToken())
+        {
+            String term = attr.toString();
+
+            // for each occurrence, increment weight by one
+            double old_weight = (retval.containsKey(term)) ? retval.get(term) : 0;
+            // TODO weights can be at most one, since we cannot use BM25 otherwise!
+            retval.put(term, old_weight + 1);
+        }
+
+        return retval;
     }
 
     /**
-     * Construct a query based on a set of weighted terms.
+     * Convert a map of term-weights to a query.
      *
-     * @param weights A map that gives the weights for terms.
+     * @param weight_map The term-weight map.
      */
-    private static Query M_termWeightsToQuery(Map<String, Double> weights) throws ParseException
+    private BooleanQuery M_weightMapToQuery(Map<String, Double> weight_map)
     {
-        String query_string = "";
+        BooleanQuery.Builder retval = new BooleanQuery.Builder();
 
-        for(Map.Entry<String, Double> entry : weights.entrySet())
+        for(Map.Entry<String, Double> entry : weight_map.entrySet())
         {
-            query_string += " " + entry.getKey() + "^" + entry.getValue();
+            Query term_query = new TermQuery(new Term(Constants.FieldNames.BODY, entry.getKey()));
+            Query boosted_query = new BoostQuery(term_query, entry.getValue().floatValue());
+
+            retval.add(boosted_query, BooleanClause.Occur.SHOULD);
         }
 
-        String[] fields = {
-                Constants.FieldNames.BODY,
-        };
-
-        Analyzer analyzer = Utils.getAnalyzer();
-        QueryParser parser = new MultiFieldQueryParser(fields, analyzer);
-
-        return parser.parse(query_string);
+        return retval.build();
     }
 }

@@ -88,7 +88,7 @@ public class Searcher
         }
     }
 
-    public SearchResult search(String querystring, int top_count) throws IOException, ParseException
+    public SearchResult search(String querystring, int top_count) throws IOException
     {
 
         Query query = builder.createBooleanQuery("body", querystring);
