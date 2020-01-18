@@ -219,7 +219,6 @@ public class Main
     private static void M_rocchioSearch(boolean do_index, boolean prompt_user_for_index, int result_count) throws IOException
     {
         Scanner input_scanner = new Scanner(System.in);
-        Searcher searcher = new Searcher();
 
         if(!do_index && prompt_user_for_index) {
             Logger.logOut("Construct index? (y)es or (n)o");
@@ -245,13 +244,14 @@ public class Main
         Logger.logOut("");
 
         // de parameters komen uit de cursus
+        Searcher searcher = new Searcher();
         Rocchio algorithm_utils = new Rocchio(0.30,0.75,0.25,1.2, 1.2, 0.75);
         RocchioQuery current_rocchio_query = algorithm_utils.parseQuery(query, Utils.getAnalyzer());
 
         // keep adjusting results and executing rocchio.
         while(true) {
             Date search_start = new Date();
-            Searcher.SearchResult result = searcher.search(query, result_count);
+            Searcher.SearchResult result = searcher.search(current_rocchio_query.toLuceneQuery(), result_count);
             Date search_end = new Date();
 
             Logger.logOut(
@@ -291,8 +291,11 @@ public class Main
             String relevant_string = input_scanner.nextLine();
             for(String rel_id : relevant_string.split(","))
             {
-                int value = Integer.parseInt(rel_id);
-                relevant_set.add(doc_counter_to_lucene_id.get(value));
+                try {
+                    int value = Integer.parseInt(rel_id);
+                    relevant_set.add(doc_counter_to_lucene_id.get(value));
+                } catch(NumberFormatException ignored) {
+                }
             }
 
             Logger.logOut("Enter non-relevant documents (comma separated):");
@@ -300,8 +303,11 @@ public class Main
             String non_relevant_string = input_scanner.nextLine();
             for(String non_rel_id : non_relevant_string.split(","))
             {
-                int value = Integer.parseInt(non_rel_id);
-                non_relevant_set.add(doc_counter_to_lucene_id.get(value));
+                try {
+                    int value = Integer.parseInt(non_rel_id);
+                    non_relevant_set.add(doc_counter_to_lucene_id.get(value));
+                } catch(NumberFormatException ignored) {
+                }
             }
 
             current_rocchio_query = algorithm_utils.adjustQuery(current_rocchio_query, relevant_set, non_relevant_set, searcher.getIndexReader());

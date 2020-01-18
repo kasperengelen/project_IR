@@ -137,21 +137,17 @@ public class Rocchio
 
         long doc_length = 0;
 
-        Fields doc_fields = index_reader.getTermVectors(doc_id);
         // TODO this returns null, fix this
-        for(String fieldname : doc_fields)
+        Terms terms = index_reader.getTermVector(doc_id, Constants.FieldNames.BODY);
+        TermsEnum enumerator = terms.iterator();
+        while(enumerator.next() != null)
         {
-            Terms terms = doc_fields.terms(fieldname);
-            TermsEnum enumerator = terms.iterator();
-            while(enumerator.next() != null)
-            {
-                String term = enumerator.term().utf8ToString();
-                long freq = enumerator.totalTermFreq();
+            String term = enumerator.term().utf8ToString();
+            long freq = enumerator.totalTermFreq();
 
-                freq_map.put(term, freq);
+            freq_map.put(term, freq);
 
-                doc_length += freq;
-            }
+            doc_length += freq;
         }
 
         return new DocStats(doc_id, doc_length, freq_map);

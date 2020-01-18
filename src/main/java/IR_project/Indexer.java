@@ -1,10 +1,7 @@
 package IR_project;
 
 import org.apache.lucene.analysis.Analyzer;
-import org.apache.lucene.document.Document;
-import org.apache.lucene.document.Field;
-import org.apache.lucene.document.StringField;
-import org.apache.lucene.document.TextField;
+import org.apache.lucene.document.*;
 import org.apache.lucene.index.*;
 import org.apache.lucene.store.Directory;
 import org.apache.lucene.store.FSDirectory;
@@ -160,9 +157,14 @@ public class Indexer
             //       if STORE is set to false, it still can be used in queries, but it won't be returned
             //                  as the result of the search
 
+
+            // SOURCE: https://stackoverflow.com/questions/33133077/lucene-5-3-term-vector
+            // this field type is identical to textfield "not stored", except it also has a term vector.
+            FieldType custom_text_field_type = new FieldType(TextField.TYPE_NOT_STORED);
+            custom_text_field_type.setStoreTermVectors(true);
+
             doc.add(new TextField(Constants.FieldNames.TITLE,    handler.getTitle(),                                Field.Store.NO));
-            doc.add(new TextField(Constants.FieldNames.BODY,     handler.getQuestion() + " "
-                                                        + String.join(" ", handler.getAnswers()), Field.Store.NO));
+            doc.add(new Field(Constants.FieldNames.BODY,     handler.getQuestion() + " " + String.join(" ", handler.getAnswers()), custom_text_field_type));
             doc.add(new TextField(Constants.FieldNames.TAGS,     handler.getTags(),                                 Field.Store.NO));
 
             // we use the filename to identify the document.
