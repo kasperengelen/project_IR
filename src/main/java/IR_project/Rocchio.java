@@ -14,6 +14,7 @@ import java.util.Map;
 /**
  * SOURCES:
  * https://github.com/uiucGSLIS/ir-tools/blob/master/src/main/java/edu/gslis/lucene/expansion/Rocchio.java
+ * https://github.com/gtsherman/lucene/blob/master/src/main/java/org/retrievable/lucene/searching/expansion/Rocchio.java
  * https://www.baeldung.com/lucene-analyzers
  */
 public class Rocchio
