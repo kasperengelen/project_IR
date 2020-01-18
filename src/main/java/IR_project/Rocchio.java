@@ -23,6 +23,7 @@ public class Rocchio
     private double m_gamma;
 
     private double m_BM25k1;
+    private double m_BM25k3;
     private double m_BM25b;
 
     /**
@@ -33,9 +34,10 @@ public class Rocchio
      * @param gamma The alpha parameter for the Rocchio algorithm.
      *
      * @param bm25_k1 The k1 parameter for the BM25 algorithm.
+     * @param bm25_k3 The k3 parameter for the BM25 algorithm.
      * @param bm25_b The b parameter for the BM25 algorithm.
      */
-    public Rocchio(double alpha, double beta, double gamma, double bm25_k1, double bm25_b)
+    public Rocchio(double alpha, double beta, double gamma, double bm25_k1, double bm25_k3, double bm25_b)
     {
         m_alpha = alpha;
         m_beta = beta;
@@ -43,6 +45,7 @@ public class Rocchio
 
         m_BM25k1 = bm25_k1;
         m_BM25b = bm25_b;
+        m_BM25k3 = bm25_k3;
     }
 
     /**
@@ -93,7 +96,7 @@ public class Rocchio
                 String term = entry.getKey();
 
                 // retrieve old weight that is currently in the map
-                double old_weight = (new_query_weights.containsKey(term)) ? new_query_weights.get(term) : 0;
+                double old_weight = new_query_weights.getOrDefault(term, 0.0);
 
                 // increment old weight with new weight
                 new_query_weights.put(term, old_weight + entry.getValue() * m_gamma);
@@ -135,6 +138,7 @@ public class Rocchio
         long doc_length = 0;
 
         Fields doc_fields = index_reader.getTermVectors(doc_id);
+        // TODO this returns null, fix this
         for(String fieldname : doc_fields)
         {
             Terms terms = doc_fields.terms(fieldname);
@@ -189,5 +193,40 @@ public class Rocchio
         }
 
         return retval;
+    }
+
+    /**
+     * Construct a query based on the specified query string. The query string is tokenized and preprocessed by the specified
+     * analyzer.
+     */
+    public RocchioQuery parseQuery(String querystring, Analyzer analyzer) throws IOException
+    {
+        Map<String, Integer> term_freq = new HashMap<>();
+
+        TokenStream tokens = analyzer.tokenStream(Constants.FieldNames.BODY, querystring);
+        CharTermAttribute attr = tokens.addAttribute(CharTermAttribute.class);
+        tokens.reset();
+
+        while(tokens.incrementToken())
+        {
+            String term = attr.toString();
+
+            Integer old_freq = term_freq.getOrDefault(term, 0);
+
+            term_freq.put(term, old_freq + 1);
+        }
+
+        Map<String, Double> weights = new HashMap<>();
+
+        for(Map.Entry<String, Integer> entry : term_freq.entrySet())
+        {
+            double x = (m_BM25k3 + 1) * entry.getValue();
+
+            double y = m_BM25k3 + entry.getValue();
+
+            weights.put(entry.getKey(), x / y);
+        }
+
+        return new RocchioQuery(weights);
     }
 }

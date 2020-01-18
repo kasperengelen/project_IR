@@ -18,27 +18,6 @@ public class RocchioQuery
     private Map<String, Double> m_weights = new HashMap<>();
 
     /**
-     * Construct a query based on the specified query string. The query string is tokenized and preprocessed by the specified
-     * analyzer.
-     */
-    public RocchioQuery(String querystring, Analyzer analyzer) throws IOException
-    {
-        TokenStream tokens = analyzer.tokenStream(Constants.FieldNames.BODY, querystring);
-        CharTermAttribute attr = tokens.addAttribute(CharTermAttribute.class);
-        tokens.reset();
-
-        while(tokens.incrementToken())
-        {
-            String term = attr.toString();
-
-            if(!m_weights.containsKey(term))
-            {
-                m_weights.put(term, 1.0);
-            }
-        }
-    }
-
-    /**
      * Construct a query based on the specified term weights.
      */
     public RocchioQuery(Map<String, Double> weights)

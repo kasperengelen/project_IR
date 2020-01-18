@@ -79,19 +79,18 @@ public class Main
             boolean print_imm = true;
             int top = 10;
 
-            for (int i = 1; i < argv.length; i++) {
+            for (int i = 0; i < argv.length; i++) {
                 String arg = argv[i];
 
                 // split on "="
 
                 if (!arg.contains("=")) {
                     Logger.logError("Invalid formatted argument '%s'", arg);
-                    return;
+                    continue;
                 }
 
                 String[] splitted = arg.split("=");
                 String value = splitted[1].toLowerCase();
-
 
                 switch (splitted[0].toLowerCase()) {
                     case "mode":
@@ -245,13 +244,13 @@ public class Main
         Logger.logOut("Searching for '" + query + "'...");
         Logger.logOut("");
 
-        Rocchio algorithm_utils = new Rocchio(0,0,0,0,0);
-        RocchioQuery current_rocchio_query;
+        // de parameters komen uit de cursus
+        Rocchio algorithm_utils = new Rocchio(0.30,0.75,0.25,1.2, 1.2, 0.75);
+        RocchioQuery current_rocchio_query = algorithm_utils.parseQuery(query, Utils.getAnalyzer());
 
         // keep adjusting results and executing rocchio.
         while(true) {
             Date search_start = new Date();
-            current_rocchio_query = new RocchioQuery(query, Utils.getAnalyzer());
             Searcher.SearchResult result = searcher.search(query, result_count);
             Date search_end = new Date();
 
@@ -288,7 +287,7 @@ public class Main
 
             Logger.logOut("Enter relevant documents (comma separated):");
 
-            // TODO document id's opvragen
+            // ask user for relevant and non-relevant documents
             String relevant_string = input_scanner.nextLine();
             for(String rel_id : relevant_string.split(","))
             {
@@ -302,7 +301,7 @@ public class Main
             for(String non_rel_id : non_relevant_string.split(","))
             {
                 int value = Integer.parseInt(non_rel_id);
-                relevant_set.add(doc_counter_to_lucene_id.get(value));
+                non_relevant_set.add(doc_counter_to_lucene_id.get(value));
             }
 
             current_rocchio_query = algorithm_utils.adjustQuery(current_rocchio_query, relevant_set, non_relevant_set, searcher.getIndexReader());
