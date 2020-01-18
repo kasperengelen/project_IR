@@ -59,7 +59,7 @@ public class Searcher
         /**
          * Map that converts stackoverflow question ID's to lucene document id's.
          */
-        public Map<String, Integer> docIdentifierToInternalId;
+        public Map<String, Integer> docIdentifierToInternalId = new HashMap<>();
     }
 
     private IndexReader reader;

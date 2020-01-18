@@ -170,7 +170,6 @@ public class Main
 
 
             Scanner input_scanner = new Scanner(System.in);
-            Searcher searcher = new Searcher();
 
             if(!do_index && prompt_user_for_index) {
                 Logger.logOut("Construct index? (y)es or (n)o");
@@ -196,6 +195,7 @@ public class Main
             Logger.logOut("");
 
             Date search_start = new Date();
+            Searcher searcher = new Searcher();
             Searcher.SearchResult result = searcher.search(query, result_count);
             Date search_end = new Date();
 
