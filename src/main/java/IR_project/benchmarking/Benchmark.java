@@ -10,6 +10,8 @@ import org.apache.lucene.search.similarities.LMDirichletSimilarity;
 
 import java.io.*;
 import java.nio.file.Paths;
+import java.util.Arrays;
+import java.util.List;
 
 
 /**
@@ -33,7 +35,7 @@ public class Benchmark
                 String query = line.substring(0, splitIdx-1);
                 String docID = line.substring(splitIdx+2).toLowerCase().replace(".xml", "").toUpperCase();
 
-                Searcher.SearchResult result = s.search(query, 100);
+                Searcher.SearchResult result = s.search(query, 20);
                 int rank = result.topResultIDs.indexOf(docID) + 1;
                 rank_out.println(rank);
 
@@ -52,6 +54,46 @@ public class Benchmark
         }
     }
 
+    public static void titleTermQueryBM(Searcher s, String sim) {
+        try {
+            BufferedReader br = new BufferedReader(new FileReader("./groundTruth/titleTermQueryDoc.txt"));
+            PrintWriter code_out = new PrintWriter(new File("./titleTermQueryResults" + sim + ".txt"));
+
+            String line;
+            int count = 1;
+            while ((line = br.readLine()) != null) {
+
+                String[] queryAndDocs = line.split(" \\| ");
+                String query = queryAndDocs[0];
+                List<String> docs = Arrays.asList(queryAndDocs[1].split(" "));
+//                String docID = line.substring(splitIdx+2).toLowerCase().replace(".xml", "").toUpperCase();
+
+//                Logger.logDebug(query);
+                Searcher.SearchResult result = s.search(query, 20);
+
+                StringBuilder code = new StringBuilder(docs.size() + "|");
+
+                for (String docID : result.topResultIDs) {
+                    code.append(docs.contains(docID) ? 1 : 0);
+                }
+
+                code_out.println(code);
+
+                if (count % 1000 == 0) {
+                    Logger.logDebug("Processed %d queries", count);
+                    code_out.flush();
+                }
+                count++;
+            }
+
+            code_out.close();
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            System.exit(-1);
+        }
+    }
+
     public static void main(String[] argv)
     {
         Logger.logDebug("Initializing search engines");
@@ -61,19 +103,19 @@ public class Benchmark
         Searcher s4 = new Searcher(Paths.get("../index3/"),  new LMDirichletSimilarity((float) 0.8));
 
         Logger.logDebug("Started BM25 benchmark");
-        titleQueryBM(s1, "BM25");
+        titleTermQueryBM(s1, "BM25");
         Logger.logDebug("Completed BM25 benchmark");
 //
         Logger.logDebug("Started TF-IDF benchmark");
-        titleQueryBM(s2, "TD-IDF");
+        titleTermQueryBM(s2, "TD-IDF");
         Logger.logDebug("Completed TF-IDF benchmark");
 
         Logger.logDebug("Started LM Jelinek-Mercer benchmark");
-        titleQueryBM(s3, "LMJM");
+        titleTermQueryBM(s3, "LMJM");
         Logger.logDebug("Completed LM Jelinek-Mercer benchmark");
 
         Logger.logDebug("Started LM Dirichlet benchmark");
-        titleQueryBM(s4, "LMD");
+        titleTermQueryBM(s4, "LMD");
         Logger.logDebug("Completed LM Dirichlet benchmark");
     }
 }
