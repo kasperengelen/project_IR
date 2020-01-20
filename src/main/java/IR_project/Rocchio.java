@@ -10,6 +10,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * Class that provides an implementation of the rocchio relevance feedback algorithm.
+ */
 public class Rocchio
 {
     private double m_alpha;
@@ -46,8 +49,8 @@ public class Rocchio
      * Adjust the specified query to the set of relevant and irrelevant documents.
      *
      * @param old_query The original query.
-     * @param relevant_set A list of document ids that have been marked as relevant.
-     * @param non_relevant_set A list of document ids that have been marked as irrelevant.
+     * @param relevant_set A list of lucene internal document ids that have been marked as relevant.
+     * @param non_relevant_set A list of lucene internal document ids that have been marked as irrelevant.
      *
      * @return The adjusted query.
      */
@@ -131,7 +134,6 @@ public class Rocchio
 
         long doc_length = 0;
 
-        // TODO this returns null, fix this
         Terms terms = index_reader.getTermVector(doc_id, Constants.FieldNames.BODY);
         TermsEnum enumerator = terms.iterator();
         while(enumerator.next() != null)

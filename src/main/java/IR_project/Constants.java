@@ -17,22 +17,17 @@ public class Constants
     /**
      * The default similarity that will be used
      */
-    public static final Similarity DEFAULT_SIM = new BM25Similarity();
-//    public static final Similarity DEFAULT_SIM = new ClassicSimilarity();
-//    public static final Similarity DEFAULT_SIM = new LMJelinekMercerSimilarity((float) 0.8);
-//    public static final Similarity DEFAULT_SIM = new LMDirichletSimilarity((float) 0.8);
+    public static final Similarity SIMILARITY = new BM25Similarity();
+
     /**
      * Path to the directory that contains the index files.
      */
-    public static final Path PATH_INDEX = Paths.get("../index/"); // BM25
-//    public static final Path PATH_INDEX = Paths.get("../index1/"); // TD-IDF
-//    public static final Path PATH_INDEX = Paths.get("../index2/"); // LMJM
-//    public static final Path PATH_INDEX = Paths.get("../index3/"); // LMD
+    public static final Path PATH_INDEX = Paths.get("../index/");
 
     /**
      * Path to the directory that contains the document files.
      */
-    public static final Path PATH_DOCUMENTS = Paths.get("../sample_500k/");
+    public static final Path PATH_DOCUMENTS = Paths.get("../sample_100k/");
 
     /**
      * Class that contains constants for different field names.

@@ -1,12 +1,8 @@
 package IR_project;
 
-import org.apache.lucene.analysis.Analyzer;
-import org.apache.lucene.analysis.TokenStream;
-import org.apache.lucene.analysis.tokenattributes.CharTermAttribute;
 import org.apache.lucene.index.Term;
 import org.apache.lucene.search.*;
 
-import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 

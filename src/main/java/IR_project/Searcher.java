@@ -71,7 +71,7 @@ public class Searcher
         try {
             reader = DirectoryReader.open(FSDirectory.open(Constants.PATH_INDEX));
             searcher = new IndexSearcher(reader);
-            searcher.setSimilarity(Constants.DEFAULT_SIM);
+            searcher.setSimilarity(Constants.SIMILARITY);
             analyzer = Utils.getAnalyzer();
             builder = new QueryBuilder(analyzer);
         } catch (IOException e) {

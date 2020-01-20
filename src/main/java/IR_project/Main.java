@@ -1,15 +1,7 @@
 package IR_project;
 
-import org.apache.lucene.search.Query;
-import org.xml.sax.SAXException;
-
-import javax.xml.parsers.ParserConfigurationException;
-import javax.xml.parsers.SAXParser;
-import javax.xml.parsers.SAXParserFactory;
 import java.io.*;
-import java.nio.charset.StandardCharsets;
 import java.nio.file.*;
-import java.nio.file.attribute.BasicFileAttributes;
 import java.util.*;
 
 /**
@@ -17,66 +9,28 @@ import java.util.*;
  */
 public class Main
 {
-    public static void printTitles(Path documents_path)
-    {
-        try {
-            // format "<doc id> <title>"
-            PrintWriter title_out = new PrintWriter(new File("./file_titles.txt"));
-            // format "<doc id> <tags>"
-            PrintWriter tags_out = new PrintWriter(new File("./file_tags.txt"));
-
-            if (Files.isDirectory(documents_path)) {
-                Files.walkFileTree(documents_path, new SimpleFileVisitor<Path>()
-                {
-                    @Override
-                    public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException
-                    {
-                        try {
-                            // parse document
-                            SAXParserFactory factory = SAXParserFactory.newInstance();
-                            SAXParser saxParser = factory.newSAXParser();
-                            DocumentXMLHandler handler = new DocumentXMLHandler();
-
-                            String file_data = "<document>";
-
-                            file_data += new String(Files.readAllBytes(file));
-
-                            file_data += "</document>";
-
-                            InputStream file_stream = new ByteArrayInputStream(file_data.getBytes(StandardCharsets.UTF_8));
-
-                            saxParser.parse(file_stream, handler);
-
-                            String doc_id = Utils.getDocumentID(file);
-
-                            title_out.println(doc_id + " " + handler.getTitle());
-                            tags_out.println(doc_id + " " + handler.getTags());
-
-                        } catch (SAXException | ParserConfigurationException e) {
-
-                        }
-
-                        return FileVisitResult.CONTINUE;
-                    }
-                });
-
-                title_out.close();
-                tags_out.close();
-            }
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-    }
-
+    /**
+     * Main function.
+     *
+     * Argument format: "x=y"
+     *
+     * Arguments:
+     *  mode: can by "normal" for normal search and "rocchio" for relevance feedback.
+     *  index: can be "true" to perform index, can be "false" to not perform index. The program will prompt the user if omitted.
+     *  progress: can be "true" to print indexing progress, can be "false" not to print indexing progress.
+     *  top: pass integer value. The value will be the amount of documents returned during search.
+     *
+     * @param argv Program arguments.
+     */
     public static void main(String[] argv)
     {
-        // format: <exec> mode=normal mode=rocchio index=true index=false print_imm=true print_imm=false top=<int>
+        // format: <exec> mode=normal mode=rocchio index=true index=false progress=true progress=false top=<int>
         try {
 
-            boolean normal_search = true;
-            boolean index = false;
-            boolean prompt_for_index = true;
-            boolean print_imm = true;
+            boolean normal_search = true; // by default, do normal search
+            boolean index = false; // by default, don't do index, but ask
+            boolean prompt_for_index = true; // by default, ask for indexing
+            boolean print_progress = true; // by default, print progress while indexing.
             int top = 10;
 
             for (int i = 0; i < argv.length; i++) {
@@ -120,11 +74,11 @@ public class Main
                         }
 
                         break;
-                    case "print_imm": {
+                    case "progress": {
                         if(value.equals("true")) {
-                            print_imm = true;
+                            print_progress = true;
                         } else if(value.equals("false")) {
-                            print_imm = false;
+                            print_progress = false;
                         } else {
                             Logger.logError("Invalid boolean '%s'", splitted[1]);
                             return;
@@ -144,10 +98,30 @@ public class Main
                 }
             }
 
+            // create index of needed
+            {
+                Scanner input_scanner = new Scanner(System.in);
+
+                if (!index && prompt_for_index) {
+                    Logger.logOut("Construct index? (y)es or (n)o");
+
+                    String answer = input_scanner.nextLine();
+
+                    index = (answer.toLowerCase().equals("y") || answer.toLowerCase().equals("yes"));
+                }
+
+                if (index) {
+                    Indexer.IndexationStats stats = Indexer.createIndex(Constants.PATH_DOCUMENTS, Constants.PATH_INDEX, false, print_progress);
+
+                    Logger.logOut("Indexing complete. Indexed %d/%d documents. Took %d miliseconds.", stats.completed, stats.total, stats.runtime);
+
+                }
+            }
+
             if(normal_search) {
-                M_normalSearch(index, prompt_for_index, top);
+                M_normalSearch(top);
             } else {
-                M_rocchioSearch(index, prompt_for_index, top);
+                M_rocchioSearch(top);
             }
 
         } catch(Exception e) {
@@ -159,32 +133,12 @@ public class Main
     /**
      * Run the normal retrieval mode of the program.
      *
-     * @param do_index True if the index needs to be created.
-     * @param prompt_user_for_index True if the user needs to be asked whether the index is to be created.
      * @param result_count Maximum number of results that are displayed.
      */
-    private static void M_normalSearch(boolean do_index, boolean prompt_user_for_index, int result_count)
+    private static void M_normalSearch(int result_count)
     {
         try {
-
-
             Scanner input_scanner = new Scanner(System.in);
-
-            if(!do_index && prompt_user_for_index) {
-                Logger.logOut("Construct index? (y)es or (n)o");
-
-                String answer = input_scanner.nextLine();
-
-                do_index = (answer.toLowerCase().equals("y") || answer.toLowerCase().equals("yes"));
-            }
-
-            if(do_index)
-            {
-                Indexer.IndexationStats stats = Indexer.createIndex(Constants.PATH_DOCUMENTS, Constants.PATH_INDEX, false, true);
-
-                Logger.logOut("Indexing complete. Indexed %d/%d documents. Took %d miliseconds.", stats.completed, stats.total, stats.runtime);
-
-            }
 
             Logger.logOut("Input query:");
             String query = input_scanner.nextLine();
@@ -206,8 +160,7 @@ public class Main
             for (String identifier : result.topResultIDs)
             {
                 Logger.logOut("");
-                Logger.logOut(identifier);
-//                DocumentPrinter.printDocument(Paths.get(Constants.PATH_DOCUMENTS.toString(), identifier + ".xml"));
+                DocumentPrinter.printDocument(Paths.get(Constants.PATH_DOCUMENTS.toString(), identifier + ".xml"));
             }
 
         } catch(Exception e) {
@@ -216,25 +169,14 @@ public class Main
         }
     }
 
-    private static void M_rocchioSearch(boolean do_index, boolean prompt_user_for_index, int result_count) throws IOException
+    /**
+     * Run the program with Rocchio relevance feedback.
+     *
+     * @param result_count Maximum number of results that are displayed.
+     */
+    private static void M_rocchioSearch(int result_count) throws IOException
     {
         Scanner input_scanner = new Scanner(System.in);
-
-        if(!do_index && prompt_user_for_index) {
-            Logger.logOut("Construct index? (y)es or (n)o");
-
-            String answer = input_scanner.nextLine();
-
-            do_index = (answer.toLowerCase().equals("y") || answer.toLowerCase().equals("yes"));
-        }
-
-        if(do_index)
-        {
-            Indexer.IndexationStats stats = Indexer.createIndex(Constants.PATH_DOCUMENTS, Constants.PATH_INDEX, false, true);
-
-            Logger.logOut("Indexing complete. Indexed %d/%d documents. Took %d miliseconds.", stats.completed, stats.total, stats.runtime);
-
-        }
 
         Logger.logOut("Input query:");
         String query = input_scanner.nextLine();
@@ -274,7 +216,7 @@ public class Main
                 doc_counter++;
             }
 
-            Logger.logOut("Refine using feedback?");
+            Logger.logOut("Refine using feedback? (y)es or (n)o");
             String feedback_answer = input_scanner.nextLine();
             boolean do_feedback = (feedback_answer.toLowerCase().equals("y") || feedback_answer.toLowerCase().equals("yes"));
 
