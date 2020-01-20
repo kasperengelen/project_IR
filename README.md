@@ -4,10 +4,10 @@ This is our project that we made for the course Information Retrieval.
 
 ## Command line arguments
 
-* ```mode```: can be "normal" for normal search and "rocchio" for relevance feedback.
+* ```mode```: can be "normal" for normal search and "rocchio" for relevance feedback. Default is "normal".
 * ```index```: can be "true" to perform index, can be "false" to not perform index. The program will prompt the user if omitted.
-* ```progress```: can be "true" to print indexing progress, can be "false" not to print indexing progress.
-* ```top```: pass integer value. The value will be the amount of documents returned during search.
+* ```progress```: can be "true" to print indexing progress, can be "false" not to print indexing progress. Default is "true".
+* ```top```: pass integer value. The value will be the amount of documents returned during search. Default is 10.
 
 ## Constants
 
