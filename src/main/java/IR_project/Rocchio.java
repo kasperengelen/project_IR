@@ -4,19 +4,12 @@ import org.apache.lucene.analysis.Analyzer;
 import org.apache.lucene.analysis.TokenStream;
 import org.apache.lucene.analysis.tokenattributes.CharTermAttribute;
 import org.apache.lucene.index.*;
-import org.apache.lucene.search.*;
 
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-/**
- * SOURCES:
- * https://github.com/uiucGSLIS/ir-tools/blob/master/src/main/java/edu/gslis/lucene/expansion/Rocchio.java
- * https://github.com/gtsherman/lucene/blob/master/src/main/java/org/retrievable/lucene/searching/expansion/Rocchio.java
- * https://www.baeldung.com/lucene-analyzers
- */
 public class Rocchio
 {
     private double m_alpha;
@@ -161,6 +154,8 @@ public class Rocchio
     {
         Map<String, Double> retval = new HashMap<>();
 
+        // SOURCES: https://github.com/gtsherman/lucene/blob/master/src/main/java/org/retrievable/lucene/searching/expansion/Rocchio.java
+
         // number of documents in collection
         double N = reader.numDocs();
 
@@ -198,6 +193,8 @@ public class Rocchio
      */
     public RocchioQuery parseQuery(String querystring, Analyzer analyzer) throws IOException
     {
+        // SOURCE: https://www.baeldung.com/lucene-analyzers
+
         Map<String, Integer> term_freq = new HashMap<>();
 
         TokenStream tokens = analyzer.tokenStream(Constants.FieldNames.BODY, querystring);

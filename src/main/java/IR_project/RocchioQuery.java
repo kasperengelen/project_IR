@@ -38,6 +38,9 @@ public class RocchioQuery
      */
     public Query toLuceneQuery()
     {
+        // SOURCE: https://stackoverflow.com/questions/34783819/assigning-different-weights-to-different-query-terms-in-lucene
+        // SOURCE: https://stackoverflow.com/questions/47289641/how-do-i-boost-queries-in-lucene-7
+
         BooleanQuery.Builder retval = new BooleanQuery.Builder();
 
         for(Map.Entry<String, Double> entry : m_weights.entrySet())
