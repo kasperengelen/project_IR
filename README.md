@@ -1,0 +1,14 @@
+# Project Information Retrieval (2019-2020)
+
+This is our project that we made for the course Information Retrieval.
+
+## Command line arguments
+
+* ```mode```: can be "normal" for normal search and "rocchio" for relevance feedback.
+* ```index```: can be "true" to perform index, can be "false" to not perform index. The program will prompt the user if omitted.
+* ```progress```: can be "true" to print indexing progress, can be "false" not to print indexing progress.
+* ```top```: pass integer value. The value will be the amount of documents returned during search.
+
+## Constants
+
+There is a ```Constants``` class that contains the entries ```PATH_INDEX``` and ```PATH_DOCUMENTS```. These need to be set to point to the folder containing the index and the documents respectively.
