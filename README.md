@@ -1,6 +1,6 @@
 # Project Information Retrieval (2019-2020)
 
-This is our project that we made for the course Information Retrieval.
+This is our project that we made for the course Information Retrieval. In this project we had index a large amount of files so that it was possible to query information from the dataset.
 
 ## Command line arguments
 
